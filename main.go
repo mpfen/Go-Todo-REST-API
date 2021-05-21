@@ -4,11 +4,12 @@ import (
 	"log"
 	"net/http"
 
-	api "github.com/mpfen/Go-Todo-REST-API/api"
+	"github.com/mpfen/Go-Todo-REST-API/api"
 )
 
 func main() {
-	server := &api.ProjectServer{}
+	db := api.NewDatabaseConnection()
+	server := &api.ProjectServer{db}
 
 	err := http.ListenAndServe(":5000", server)
 

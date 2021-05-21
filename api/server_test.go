@@ -1,23 +1,29 @@
 package api_test
 
 import (
+	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	api "github.com/mpfen/Go-Todo-REST-API/api"
+	"github.com/mpfen/Go-Todo-REST-API/api/model"
 )
 
-// DB stub for testing
+// DB store stub for testing
 type StubProjectStore struct {
 	projects map[string]string
 }
 
-func (s *StubProjectStore) GetProjectInfo(name string) string {
-	return name
+// creates a makeshift project struct to comply with ProjectStore interface
+func (s *StubProjectStore) GetProject(name string) model.Project {
+	project := model.Project{}
+	project.Name = s.projects[name]
+	return project
 }
 
-// GET /projects/{name}
+// Tests for route GET /projects/{name}
 func TestGetProject(t *testing.T) {
 	store := StubProjectStore{
 		map[string]string{
@@ -34,7 +40,7 @@ func TestGetProject(t *testing.T) {
 
 		server.ServeHTTP(response, request)
 
-		got := response.Body.String()
+		got := decodeProjectFromResponse(t, response.Body).Name
 		want := "homework"
 
 		assertResponseStatus(t, response.Code, 200)
@@ -47,7 +53,7 @@ func TestGetProject(t *testing.T) {
 
 		server.ServeHTTP(response, request)
 
-		got := response.Body.String()
+		got := decodeProjectFromResponse(t, response.Body).Name
 		want := "cleaning"
 
 		assertResponseStatus(t, response.Code, 200)
@@ -79,4 +85,18 @@ func assertResponseStatus(t testing.TB, got, want int) {
 	if got != want {
 		t.Errorf("did not get correct status code, got %d, want %d", got, want)
 	}
+}
+
+// Decodes the response body to a project struct
+func decodeProjectFromResponse(t testing.TB, rdr io.Reader) model.Project {
+	t.Helper()
+
+	var project model.Project
+
+	err := json.NewDecoder(rdr).Decode(&project)
+	if err != nil {
+		t.Errorf("problem parsing project, %v", err)
+	}
+
+	return project
 }

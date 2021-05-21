@@ -1,30 +1,45 @@
 package api
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
+
+	"github.com/mpfen/Go-Todo-REST-API/api/model"
 )
 
-type Project struct {
-	Name string
-}
+const jsonContentType = "application/json"
 
-// Projects only have a name right now
+// ProjectStore interface for testing
+// Tests use own implementation
 type ProjectStore interface {
-	GetProjectInfo(name string) string
+	GetProject(name string) model.Project
 }
 
 type ProjectServer struct {
 	Store ProjectStore
 }
 
-func (p *ProjectServer) GetProjectInfo(name string) string {
-
-	return name
+func (p *ProjectServer) GetProject(name string) model.Project {
+	project := p.Store.GetProject(name)
+	return project
 }
 
+// GET /projects/{name}
+// response is json
 func (p *ProjectServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	project := strings.TrimPrefix(r.URL.Path, "/projects/")
-	fmt.Fprint(w, p.Store.GetProjectInfo(project))
+	projectName := strings.TrimPrefix(r.URL.Path, "/projects/")
+
+	project := p.GetProject(projectName)
+
+	if project.Name == "" {
+		w.WriteHeader(http.StatusNotFound)
+		fmt.Fprint(w, "")
+		return
+	}
+
+	w.Header().Set("content-type", jsonContentType)
+	json.NewEncoder(w).Encode(project)
+	w.WriteHeader(http.StatusOK)
 }
