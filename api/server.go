@@ -3,33 +3,45 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
-	"strings"
 
+	"github.com/gorilla/mux"
 	"github.com/mpfen/Go-Todo-REST-API/api/model"
 )
 
 const jsonContentType = "application/json"
 
 // ProjectStore interface for testing
-// Tests use own implementation
+// Tests use own implementation with
+// StubStore instead of a real database
 type ProjectStore interface {
 	GetProject(name string) model.Project
 }
 
 type ProjectServer struct {
-	Store ProjectStore
+	Router *mux.Router
+	Store  ProjectStore
 }
 
-func (p *ProjectServer) GetProject(name string) model.Project {
-	project := p.Store.GetProject(name)
-	return project
+func NewProjectServer(store ProjectStore) *ProjectServer {
+	p := new(ProjectServer)
+	p.Store = store
+
+	p.Router = mux.NewRouter()
+	p.Router.HandleFunc("/projects/{name}", p.GetProject).Methods("GET")
+
+	return p
 }
 
-// GET /projects/{name}
-// response is json
-func (p *ProjectServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	projectName := strings.TrimPrefix(r.URL.Path, "/projects/")
+func (p *ProjectServer) GetProject(w http.ResponseWriter, r *http.Request) {
+	getProjectHandler(p.Store, w, r)
+}
+
+func getProjectHandler(p ProjectStore, w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	projectName := vars["name"]
+	log.Print("Handlername:" + projectName)
 
 	project := p.GetProject(projectName)
 

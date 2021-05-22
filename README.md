@@ -2,7 +2,7 @@
 
 A RESTful API example for simple todo application with Go. Idea from [mingrammer/go-todo-rest-api-example](https://github.com/mingrammer/go-todo-rest-api-example). 
 
-Uses [GORM](https://gorm.io/) as ORM library.
+Uses [GORM](https://gorm.io/) as ORM library and [gorilla/mux](https://github.com/gorilla/mux) for routing.
 
 ## API
 

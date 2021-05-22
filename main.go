@@ -9,9 +9,9 @@ import (
 
 func main() {
 	db := api.NewDatabaseConnection()
-	server := &api.ProjectServer{db}
+	server := api.NewProjectServer(db)
 
-	err := http.ListenAndServe(":5000", server)
+	err := http.ListenAndServe(":5000", server.Router)
 
 	if err != nil {
 		log.Fatalf("could not listen on port 5000 %v", err)

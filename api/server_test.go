@@ -32,13 +32,14 @@ func TestGetProject(t *testing.T) {
 		},
 	}
 
-	server := &api.ProjectServer{&store}
+	// Uses the ProjectServer with our StubProjectStore
+	server := api.NewProjectServer(&store)
 
 	t.Run("returns project homework", func(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/projects/homework", nil)
 		response := httptest.NewRecorder()
 
-		server.ServeHTTP(response, request)
+		server.Router.ServeHTTP(response, request)
 
 		got := decodeProjectFromResponse(t, response.Body).Name
 		want := "homework"
@@ -51,7 +52,7 @@ func TestGetProject(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/projects/cleaning", nil)
 		response := httptest.NewRecorder()
 
-		server.ServeHTTP(response, request)
+		server.Router.ServeHTTP(response, request)
 
 		got := decodeProjectFromResponse(t, response.Body).Name
 		want := "cleaning"
@@ -64,7 +65,7 @@ func TestGetProject(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/projects/laundry", nil)
 		response := httptest.NewRecorder()
 
-		server.ServeHTTP(response, request)
+		server.Router.ServeHTTP(response, request)
 
 		got := response.Code
 		want := http.StatusNotFound
