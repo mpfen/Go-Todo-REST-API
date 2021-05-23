@@ -140,6 +140,12 @@ func assertProjectCreated(t testing.TB, store StubProjectStore, name string) {
 	}
 }
 
+func assertError(t testing.TB, context string, err error) {
+	if err != nil {
+		t.Fatalf("error - %v: %v", context, err)
+	}
+}
+
 // Decodes the response body to a project struct
 func decodeProjectFromResponse(t testing.TB, rdr io.Reader) model.Project {
 	t.Helper()

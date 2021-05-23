@@ -37,8 +37,8 @@ func (d *Database) PostProject(name string) error {
 }
 
 // creates database struct and runs automigrate
-func NewDatabaseConnection() *Database {
-	db, err := gorm.Open(sqlite.Open("database.db"), &gorm.Config{})
+func NewDatabaseConnection(name string) *Database {
+	db, err := gorm.Open(sqlite.Open(name), &gorm.Config{})
 
 	if err != nil {
 		log.Fatalf("Can not open Database %s", err)

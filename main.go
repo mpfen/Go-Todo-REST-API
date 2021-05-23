@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	db := api.NewDatabaseConnection()
+	db := api.NewDatabaseConnection("database.db")
 	server := api.NewProjectServer(db)
 
 	err := http.ListenAndServe(":5000", server.Router)
