@@ -15,6 +15,7 @@ import (
 type ProjectStore interface {
 	GetProject(name string) model.Project
 	PostProject(name string) error
+	GetAllProjects() []model.Project
 }
 
 type Database struct {
@@ -42,6 +43,15 @@ func (d *Database) PostProject(name string) error {
 	err := d.DB.Create(&project).Error
 
 	return err
+}
+
+// Return an array of all projects
+func (d *Database) GetAllProjects() []model.Project {
+	projects := []model.Project{}
+
+	d.DB.Find(&projects)
+
+	return projects
 }
 
 // creates database struct and runs automigrate

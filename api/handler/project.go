@@ -54,3 +54,10 @@ func PostProjectHandler(p store.ProjectStore, w http.ResponseWriter, r *http.Req
 
 	w.WriteHeader(http.StatusCreated)
 }
+
+// Handler for GET /projects/
+func GetAllProjectsHandler(p store.ProjectStore, w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("content-type", jsonContentType)
+	json.NewEncoder(w).Encode(p.GetAllProjects())
+	w.WriteHeader(http.StatusOK)
+}

@@ -33,6 +33,15 @@ func (s *StubProjectStore) PostProject(name string) error {
 	return nil
 }
 
+func (s *StubProjectStore) GetAllProjects() []model.Project {
+	projectA := model.Project{Name: "homework"}
+	projectB := model.Project{Name: "cleaning"}
+
+	projects := []model.Project{projectA, projectB}
+
+	return projects
+}
+
 // Tests for route GET /projects/{name}
 // todo update map to struct or array
 func TestGetProject(t *testing.T) {
@@ -108,7 +117,7 @@ func TestPostProject(t *testing.T) {
 		assertProjectCreated(t, store, "laundry")
 	})
 
-	t.Run("tries to create a project that already exists", func(t *testing.T) {
+	t.Run("Try to create a project that already exists", func(t *testing.T) {
 		requestBody := makeNewPostProjectBody(t, "homework")
 		request, _ := http.NewRequest(http.MethodPost, "/projects/", requestBody)
 		response := httptest.NewRecorder()
@@ -116,6 +125,41 @@ func TestPostProject(t *testing.T) {
 		server.Router.ServeHTTP(response, request)
 
 		assertResponseStatus(t, response.Code, http.StatusBadRequest)
+	})
+}
+
+// Test for Route GET /projects
+func TestGetAllProjects(t *testing.T) {
+	store := StubProjectStore{
+		map[string]string{
+			"homework": "homework",
+			"cleaning": "cleaning",
+		},
+	}
+
+	// Uses the ProjectServer with our StubProjectStore
+	server := api.NewProjectServer(&store)
+
+	t.Run("Get all stored projects", func(t *testing.T) {
+		request, _ := http.NewRequest(http.MethodGet, "/projects", nil)
+		response := httptest.NewRecorder()
+
+		server.Router.ServeHTTP(response, request)
+
+		gotProjects := decodeAllProjectsFromResponse(t, response.Body)
+
+		var got [2]string
+		for i, project := range gotProjects {
+			got[i] = project.Name
+		}
+
+		want := [2]string{"homework", "cleaning"}
+
+		if got != want {
+			t.Errorf("got %v, want %v", got, want)
+		}
+
+		assertResponseStatus(t, response.Code, 200)
 	})
 }
 
@@ -158,6 +202,20 @@ func decodeProjectFromResponse(t testing.TB, rdr io.Reader) model.Project {
 	}
 
 	return project
+}
+
+// Decodes the response body to a project struct
+func decodeAllProjectsFromResponse(t testing.TB, rdr io.Reader) []model.Project {
+	t.Helper()
+
+	var projects []model.Project
+
+	err := json.NewDecoder(rdr).Decode(&projects)
+	if err != nil {
+		t.Errorf("problem parsing project, %v", err)
+	}
+
+	return projects
 }
 
 // makes a new json request body for POST /projects/

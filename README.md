@@ -37,14 +37,14 @@ Uses [GORM](https://gorm.io/) as ORM library and [gorilla/mux](https://github.co
 
 ## Todo
 
-- [] Basic REST API
+- [ ] Basic REST API
 
-- [] Use orm to store data
+- [ ] Use orm to store data
 
-- [] Authentification
+- [ ] Authentification
 
-- [] Dockerize
+- [ ] Dockerize
 
-- [] Integration Tests
+- [ ] Integration Tests
 
-- [] ...
+- [ ] ...
