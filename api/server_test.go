@@ -25,6 +25,7 @@ func (s *StubProjectStore) GetProject(name string) model.Project {
 	return project
 }
 
+// creates a new project
 func (s *StubProjectStore) PostProject(name string) error {
 	if duplicate := s.projects[name]; duplicate != "" {
 		return errors.New("project already created")
@@ -33,11 +34,13 @@ func (s *StubProjectStore) PostProject(name string) error {
 	return nil
 }
 
+// Returns an array of all projects
 func (s *StubProjectStore) GetAllProjects() []model.Project {
-	projectA := model.Project{Name: "homework"}
-	projectB := model.Project{Name: "cleaning"}
+	var projects []model.Project
 
-	projects := []model.Project{projectA, projectB}
+	for key, _ := range s.projects {
+		projects = append(projects, model.Project{Name: key})
+	}
 
 	return projects
 }
