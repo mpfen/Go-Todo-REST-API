@@ -6,7 +6,7 @@ import (
 
 type Project struct {
 	gorm.Model `json:"id" gorm:"unique"`
-	Name       string `json:"name"`
+	Name       string `json:"name" gorm:"unique"`
 	Archived   bool   `json:"archived"`
 }
 

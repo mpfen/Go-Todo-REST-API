@@ -13,7 +13,7 @@ type Database struct {
 	DB *gorm.DB
 }
 
-// implements ProjectStore interface
+// Gets project by name
 func (d *Database) GetProject(name string) model.Project {
 	project := model.Project{}
 	err := d.DB.Find(&project, "Name = ?", name).Error
@@ -23,6 +23,17 @@ func (d *Database) GetProject(name string) model.Project {
 	}
 
 	return project
+}
+
+// Creates a new project
+func (d *Database) PostProject(name string) error {
+	project := model.Project{}
+	project.Name = name
+	project.Archived = false
+
+	err := d.DB.Create(&project).Error
+
+	return err
 }
 
 // creates database struct and runs automigrate
