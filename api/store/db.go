@@ -1,4 +1,4 @@
-package api
+package store
 
 import (
 	"log"
@@ -8,6 +8,14 @@ import (
 
 	model "github.com/mpfen/Go-Todo-REST-API/api/model"
 )
+
+// ProjectStore interface for testing
+// Tests use own implementation with
+// StubStore instead of a real database
+type ProjectStore interface {
+	GetProject(name string) model.Project
+	PostProject(name string) error
+}
 
 type Database struct {
 	DB *gorm.DB

@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	api "github.com/mpfen/Go-Todo-REST-API/api"
+	"github.com/mpfen/Go-Todo-REST-API/api/store"
 )
 
 const testdbfile = "testdb.db"
@@ -35,7 +35,7 @@ func TestDatabase(t *testing.T) {
 	createTestDB(t)
 	defer deleteTestDB(t)
 
-	db := api.NewDatabaseConnection(testdbfile)
+	db := store.NewDatabaseConnection(testdbfile)
 
 	t.Run("create a new project in database", func(t *testing.T) {
 		want := "TestDatabase"
