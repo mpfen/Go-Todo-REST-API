@@ -16,6 +16,7 @@ type ProjectStore interface {
 	GetProject(name string) model.Project
 	PostProject(name string) error
 	GetAllProjects() []model.Project
+	DeleteProject(name string) error
 }
 
 type Database struct {
@@ -52,6 +53,15 @@ func (d *Database) GetAllProjects() []model.Project {
 	d.DB.Find(&projects)
 
 	return projects
+}
+
+// delete a project
+func (d *Database) DeleteProject(name string) error {
+	project := model.Project{}
+
+	// Unscoped to delete project permanently
+	err := d.DB.Unscoped().Where("Name = ?", name).Delete(&project).Error
+	return err
 }
 
 // creates database struct and runs automigrate

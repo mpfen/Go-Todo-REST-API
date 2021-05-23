@@ -59,4 +59,9 @@ func TestDatabase(t *testing.T) {
 		}
 	})
 
+	t.Run("Delete a project", func(t *testing.T) {
+		err := db.DeleteProject("TestDatabase")
+
+		assertError(t, "Project should have been deleted", err)
+	})
 }

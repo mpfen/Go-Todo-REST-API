@@ -22,6 +22,7 @@ func NewProjectServer(store store.ProjectStore) *ProjectServer {
 	p.Router.HandleFunc("/projects/{name}", p.GetProject).Methods("GET")
 	p.Router.HandleFunc("/projects/", p.PostProject).Methods("POST")
 	p.Router.HandleFunc("/projects", p.GetAllProjects).Methods("GET")
+	p.Router.HandleFunc("/projects/{name}", p.DeleteProject).Methods("DELETE")
 
 	return p
 }
@@ -36,4 +37,8 @@ func (p *ProjectServer) PostProject(w http.ResponseWriter, r *http.Request) {
 
 func (p *ProjectServer) GetAllProjects(w http.ResponseWriter, r *http.Request) {
 	handler.GetAllProjectsHandler(p.Store, w, r)
+}
+
+func (p *ProjectServer) DeleteProject(w http.ResponseWriter, r *http.Request) {
+	handler.DeleteProjectHandler(p.Store, w, r)
 }

@@ -45,6 +45,12 @@ func (s *StubProjectStore) GetAllProjects() []model.Project {
 	return projects
 }
 
+// Deletes a project from store
+func (s *StubProjectStore) DeleteProject(name string) error {
+	delete(s.projects, name)
+	return nil
+}
+
 // Tests for route GET /projects/{name}
 // todo update map to struct or array
 func TestGetProject(t *testing.T) {
@@ -84,7 +90,7 @@ func TestGetProject(t *testing.T) {
 		assertResponseBody(t, got, want)
 	})
 
-	t.Run("return 404 on missing projects", func(t *testing.T) {
+	t.Run("return 404 on not existing projects", func(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/projects/laundry", nil)
 		response := httptest.NewRecorder()
 
@@ -166,6 +172,30 @@ func TestGetAllProjects(t *testing.T) {
 	})
 }
 
+// Test for Route DEL /Project/{name}
+func TestDeleteProject(t *testing.T) {
+	store := StubProjectStore{
+		map[string]string{
+			"homework": "homework",
+			"cleaning": "cleaning",
+		},
+	}
+
+	// Uses the ProjectServer with our StubProjectStore
+	server := api.NewProjectServer(&store)
+
+	t.Run("Delete project homework", func(t *testing.T) {
+		request, _ := http.NewRequest(http.MethodDelete, "/projects/homework", nil)
+		response := httptest.NewRecorder()
+
+		server.Router.ServeHTTP(response, request)
+
+		assertProjectDeleted(t, store, "homework")
+		assertResponseStatus(t, response.Code, 200)
+	})
+
+}
+
 func assertResponseBody(t testing.TB, got, want string) {
 	t.Helper()
 	if got != want {
@@ -184,6 +214,13 @@ func assertProjectCreated(t testing.TB, store StubProjectStore, name string) {
 	t.Helper()
 	if project := store.projects[name]; project == "" {
 		t.Fatalf("project was not created")
+	}
+}
+
+func assertProjectDeleted(t testing.TB, store StubProjectStore, name string) {
+	t.Helper()
+	if project := store.projects[name]; project != "" {
+		t.Fatalf("project was not deleted")
 	}
 }
 

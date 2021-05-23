@@ -19,15 +19,14 @@ func GetProjectHandler(p store.ProjectStore, w http.ResponseWriter, r *http.Requ
 	project := p.GetProject(projectName)
 
 	if project.Name == "" {
-		w.WriteHeader(http.StatusNotFound)
-		w.Header().Set("content-type", jsonContentType)
-		json.NewEncoder(w).Encode(map[string]string{"message": "No project with this name found"})
+		sendJSONResponse(w, "No project with this name found", http.StatusNotFound)
 		return
+	} else {
+		w.Header().Set("content-type", jsonContentType)
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(project)
 	}
 
-	w.Header().Set("content-type", jsonContentType)
-	json.NewEncoder(w).Encode(project)
-	w.WriteHeader(http.StatusOK)
 }
 
 // Handler for POST /projects/
@@ -36,9 +35,7 @@ func PostProjectHandler(p store.ProjectStore, w http.ResponseWriter, r *http.Req
 
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&project); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Header().Set("content-type", jsonContentType)
-		json.NewEncoder(w).Encode(err.Error())
+		sendJSONResponse(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	defer r.Body.Close()
@@ -46,9 +43,7 @@ func PostProjectHandler(p store.ProjectStore, w http.ResponseWriter, r *http.Req
 	err := p.PostProject(project.Name)
 
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Header().Set("content-type", jsonContentType)
-		json.NewEncoder(w).Encode(map[string]string{"message": "Project with same name already exists"})
+		sendJSONResponse(w, "Project with the same name already exists", http.StatusBadRequest)
 		return
 	}
 
@@ -58,6 +53,39 @@ func PostProjectHandler(p store.ProjectStore, w http.ResponseWriter, r *http.Req
 // Handler for GET /projects/
 func GetAllProjectsHandler(p store.ProjectStore, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", jsonContentType)
-	json.NewEncoder(w).Encode(p.GetAllProjects())
 	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(p.GetAllProjects())
+
+}
+
+// Handler for DELETE /projects/{name}
+func DeleteProjectHandler(p store.ProjectStore, w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	projectName := vars["name"]
+
+	// Check if project exists
+	project := p.GetProject(projectName)
+
+	if project.Name == "" {
+		sendJSONResponse(w, "No project with this name found", http.StatusNotFound)
+		return
+	}
+
+	// Delete project if project exists
+	err := p.DeleteProject(projectName)
+
+	if err == nil {
+		sendJSONResponse(w, "Project deleted", http.StatusOK)
+		return
+	} else {
+		sendJSONResponse(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func sendJSONResponse(w http.ResponseWriter, message string, code int) {
+	w.Header().Set("content-type", jsonContentType)
+	w.WriteHeader(code)
+	json.NewEncoder(w).Encode(map[string]string{"message": message})
+
 }
