@@ -16,9 +16,9 @@ import (
 // todo update map to struct or array
 func TestGetProject(t *testing.T) {
 	store := StubProjectStore{
-		map[string]string{
-			"homework": "homework",
-			"cleaning": "cleaning",
+		map[string]bool{
+			"homework": false,
+			"cleaning": false,
 		},
 	}
 
@@ -67,9 +67,9 @@ func TestGetProject(t *testing.T) {
 // Test for route POST /projects/
 func TestPostProject(t *testing.T) {
 	store := StubProjectStore{
-		map[string]string{
-			"homework": "homework",
-			"cleaning": "cleaning",
+		map[string]bool{
+			"homework": false,
+			"cleaning": false,
 		},
 	}
 
@@ -101,9 +101,9 @@ func TestPostProject(t *testing.T) {
 // Test for route GET /projects
 func TestGetAllProjects(t *testing.T) {
 	store := StubProjectStore{
-		map[string]string{
-			"homework": "homework",
-			"cleaning": "cleaning",
+		map[string]bool{
+			"homework": false,
+			"cleaning": false,
 		},
 	}
 
@@ -136,9 +136,9 @@ func TestGetAllProjects(t *testing.T) {
 // Test for route DEL /projects/{name}
 func TestDeleteProject(t *testing.T) {
 	store := StubProjectStore{
-		map[string]string{
-			"homework": "homework",
-			"cleaning": "cleaning",
+		map[string]bool{
+			"homework": false,
+			"cleaning": false,
 		},
 	}
 
@@ -160,9 +160,9 @@ func TestDeleteProject(t *testing.T) {
 // Test for route PUT /projects/{name}
 func TestPutProject(t *testing.T) {
 	store := StubProjectStore{
-		map[string]string{
-			"homework": "homework",
-			"cleaning": "cleaning",
+		map[string]bool{
+			"homework": false,
+			"cleaning": false,
 		},
 	}
 
@@ -199,14 +199,14 @@ func assertResponseStatus(t testing.TB, got, want int) {
 
 func assertProjectCreated(t testing.TB, store StubProjectStore, name string) {
 	t.Helper()
-	if project := store.projects[name]; project == "" {
+	if _, exists := store.projects[name]; !exists {
 		t.Fatalf("project was not created")
 	}
 }
 
 func assertProjectDeleted(t testing.TB, store StubProjectStore, name string) {
 	t.Helper()
-	if project := store.projects[name]; project != "" {
+	if _, exists := store.projects[name]; exists {
 		t.Fatalf("project was not deleted")
 	}
 }

@@ -8,23 +8,28 @@ import (
 
 // DB store stub for testing
 type StubProjectStore struct {
-	projects map[string]string
+	projects map[string]bool
 }
 
-// creates a makeshift project struct to comply with ProjectStore interface
+// Creates a makeshift project struct to comply with ProjectStore interface
 func (s *StubProjectStore) GetProject(name string) model.Project {
 	project := model.Project{}
-	project.Name = s.projects[name]
-	return project
+	if _, exists := s.projects[name]; exists {
+		project.Name = name
+		return project
+	} else {
+		return project
+	}
 }
 
-// creates a new project
+// Creates a new project
 func (s *StubProjectStore) PostProject(name string) error {
-	if duplicate := s.projects[name]; duplicate != "" {
+	if _, exists := s.projects[name]; exists {
 		return errors.New("project already created")
+	} else {
+		s.projects[name] = false
+		return nil
 	}
-	s.projects[name] = name
-	return nil
 }
 
 // Returns an array of all projects
@@ -47,6 +52,6 @@ func (s *StubProjectStore) DeleteProject(name string) error {
 // Update a project in store
 func (s *StubProjectStore) UpdateProject(oldName, newName string) error {
 	delete(s.projects, oldName)
-	s.projects[newName] = newName
+	s.projects[newName] = false
 	return nil
 }
