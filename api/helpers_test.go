@@ -43,3 +43,10 @@ func (s *StubProjectStore) DeleteProject(name string) error {
 	delete(s.projects, name)
 	return nil
 }
+
+// Update a project in store
+func (s *StubProjectStore) UpdateProject(oldName, newName string) error {
+	delete(s.projects, oldName)
+	s.projects[newName] = newName
+	return nil
+}

@@ -98,7 +98,7 @@ func TestPostProject(t *testing.T) {
 	})
 }
 
-// Test for Route GET /projects
+// Test for route GET /projects
 func TestGetAllProjects(t *testing.T) {
 	store := StubProjectStore{
 		map[string]string{
@@ -133,7 +133,7 @@ func TestGetAllProjects(t *testing.T) {
 	})
 }
 
-// Test for Route DEL /Project/{name}
+// Test for route DEL /projects/{name}
 func TestDeleteProject(t *testing.T) {
 	store := StubProjectStore{
 		map[string]string{
@@ -155,6 +155,32 @@ func TestDeleteProject(t *testing.T) {
 		assertResponseStatus(t, response.Code, 200)
 	})
 
+}
+
+// Test for route PUT /projects/{name}
+func TestPutProject(t *testing.T) {
+	store := StubProjectStore{
+		map[string]string{
+			"homework": "homework",
+			"cleaning": "cleaning",
+		},
+	}
+
+	// Uses the ProjectServer with our StubProjectStore
+	server := api.NewProjectServer(&store)
+
+	t.Run("Change the name of project homework", func(t *testing.T) {
+		projectName := "researchpaper"
+		requestBody := makeNewPostProjectBody(t, projectName)
+		request, _ := http.NewRequest(http.MethodPut, "/projects/homework", requestBody)
+		response := httptest.NewRecorder()
+
+		server.Router.ServeHTTP(response, request)
+
+		assertProjectDeleted(t, store, "homework")
+		assertProjectCreated(t, store, projectName)
+		assertResponseStatus(t, response.Code, 200)
+	})
 }
 
 func assertResponseBody(t testing.TB, got, want string) {

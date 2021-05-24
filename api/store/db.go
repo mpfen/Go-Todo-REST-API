@@ -17,6 +17,7 @@ type ProjectStore interface {
 	PostProject(name string) error
 	GetAllProjects() []model.Project
 	DeleteProject(name string) error
+	UpdateProject(oldName, newName string) error
 }
 
 type Database struct {
@@ -55,12 +56,23 @@ func (d *Database) GetAllProjects() []model.Project {
 	return projects
 }
 
-// delete a project
+// Delete a project
 func (d *Database) DeleteProject(name string) error {
 	project := model.Project{}
 
 	// Unscoped to delete project permanently
 	err := d.DB.Unscoped().Where("Name = ?", name).Delete(&project).Error
+	return err
+}
+
+// Update a project
+func (d *Database) UpdateProject(oldName, newName string) error {
+	project := model.Project{}
+	d.DB.Find(&project, "Name = ?", oldName)
+
+	project.Name = newName
+
+	err := d.DB.Save(&project).Error
 	return err
 }
 

@@ -83,6 +83,38 @@ func DeleteProjectHandler(p store.ProjectStore, w http.ResponseWriter, r *http.R
 	}
 }
 
+// Handler for PUT /projects/{name}
+func UpdateProjectHandler(p store.ProjectStore, w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	oldProjectName := vars["name"]
+
+	// Check if project exists
+	oldProject := p.GetProject(oldProjectName)
+
+	if oldProject.Name == "" {
+		sendJSONResponse(w, "No project with this name found", http.StatusNotFound)
+		return
+	}
+
+	// Update Project
+	newProject := model.Project{}
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&newProject); err != nil {
+		sendJSONResponse(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
+
+	err := p.UpdateProject(oldProject.Name, newProject.Name)
+
+	if err != nil {
+		sendJSONResponse(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	sendJSONResponse(w, "Project successfully updated", http.StatusOK)
+}
+
 func sendJSONResponse(w http.ResponseWriter, message string, code int) {
 	w.Header().Set("content-type", jsonContentType)
 	w.WriteHeader(code)
