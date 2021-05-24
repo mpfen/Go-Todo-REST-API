@@ -17,7 +17,7 @@ type ProjectStore interface {
 	PostProject(name string) error
 	GetAllProjects() []model.Project
 	DeleteProject(name string) error
-	UpdateProject(oldName, newName string) error
+	UpdateProject(project model.Project) error
 }
 
 type Database struct {
@@ -66,12 +66,7 @@ func (d *Database) DeleteProject(name string) error {
 }
 
 // Update a project
-func (d *Database) UpdateProject(oldName, newName string) error {
-	project := model.Project{}
-	d.DB.Find(&project, "Name = ?", oldName)
-
-	project.Name = newName
-
+func (d *Database) UpdateProject(project model.Project) error {
 	err := d.DB.Save(&project).Error
 	return err
 }

@@ -86,17 +86,17 @@ func DeleteProjectHandler(p store.ProjectStore, w http.ResponseWriter, r *http.R
 // Handler for PUT /projects/{name}
 func UpdateProjectHandler(p store.ProjectStore, w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	oldProjectName := vars["name"]
+	projectName := vars["name"]
 
 	// Check if project exists
-	oldProject := p.GetProject(oldProjectName)
+	project := p.GetProject(projectName)
 
-	if oldProject.Name == "" {
+	if project.Name == "" {
 		sendJSONResponse(w, "No project with this name found", http.StatusNotFound)
 		return
 	}
 
-	// Update Project
+	// Get new Project Name
 	newProject := model.Project{}
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&newProject); err != nil {
@@ -105,7 +105,9 @@ func UpdateProjectHandler(p store.ProjectStore, w http.ResponseWriter, r *http.R
 	}
 	defer r.Body.Close()
 
-	err := p.UpdateProject(oldProject.Name, newProject.Name)
+	project.Name = newProject.Name
+
+	err := p.UpdateProject(project)
 
 	if err != nil {
 		sendJSONResponse(w, err.Error(), http.StatusInternalServerError)
@@ -113,6 +115,32 @@ func UpdateProjectHandler(p store.ProjectStore, w http.ResponseWriter, r *http.R
 	}
 
 	sendJSONResponse(w, "Project successfully updated", http.StatusOK)
+}
+
+// Handler for PUT /projects/{name}/archive
+func ArchiveProjectHandler(p store.ProjectStore, w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	projectName := vars["name"]
+
+	// check if project exists
+	project := p.GetProject(projectName)
+
+	if project.Name == "" {
+		sendJSONResponse(w, "No project with this name found", http.StatusNotFound)
+		return
+	}
+
+	// archive project
+	project.ArchiveProject()
+
+	err := p.UpdateProject(project)
+
+	if err != nil {
+		sendJSONResponse(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	sendJSONResponse(w, "Project successfully archived", http.StatusOK)
 }
 
 func sendJSONResponse(w http.ResponseWriter, message string, code int) {

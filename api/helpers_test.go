@@ -49,9 +49,8 @@ func (s *StubProjectStore) DeleteProject(name string) error {
 	return nil
 }
 
-// Update a project in store
-func (s *StubProjectStore) UpdateProject(oldName, newName string) error {
-	delete(s.projects, oldName)
-	s.projects[newName] = false
+// "Updates" a project in store
+func (s *StubProjectStore) UpdateProject(project model.Project) error {
+	s.projects[project.Name] = project.Archived
 	return nil
 }

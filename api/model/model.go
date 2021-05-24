@@ -14,3 +14,11 @@ func DbMigrate(db *gorm.DB) *gorm.DB {
 	db.AutoMigrate(&Project{})
 	return db
 }
+
+func (p *Project) ArchiveProject() {
+	p.Archived = true
+}
+
+func (p *Project) UnArchiveProject() {
+	p.Archived = false
+}

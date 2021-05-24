@@ -19,11 +19,13 @@ func NewProjectServer(store store.ProjectStore) *ProjectServer {
 	p.Store = store
 
 	p.Router = mux.NewRouter()
-	p.Router.HandleFunc("/projects/{name}", p.GetProject).Methods("GET")
+
 	p.Router.HandleFunc("/projects/", p.PostProject).Methods("POST")
 	p.Router.HandleFunc("/projects", p.GetAllProjects).Methods("GET")
+	p.Router.HandleFunc("/projects/{name}", p.GetProject).Methods("GET")
 	p.Router.HandleFunc("/projects/{name}", p.DeleteProject).Methods("DELETE")
 	p.Router.HandleFunc("/projects/{name}", p.UpdateProject).Methods("PUT")
+	p.Router.HandleFunc("/projects/{name}/archive", p.ArchiveProject).Methods("PUT")
 
 	return p
 }
@@ -46,4 +48,8 @@ func (p *ProjectServer) DeleteProject(w http.ResponseWriter, r *http.Request) {
 
 func (p *ProjectServer) UpdateProject(w http.ResponseWriter, r *http.Request) {
 	handler.UpdateProjectHandler(p.Store, w, r)
+}
+
+func (p *ProjectServer) ArchiveProject(w http.ResponseWriter, r *http.Request) {
+	handler.ArchiveProjectHandler(p.Store, w, r)
 }
