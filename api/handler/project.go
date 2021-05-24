@@ -143,6 +143,32 @@ func ArchiveProjectHandler(p store.ProjectStore, w http.ResponseWriter, r *http.
 	sendJSONResponse(w, "Project successfully archived", http.StatusOK)
 }
 
+// Handler for DELETE /projects/{name}/archive
+func UnArchiveProjectHandler(p store.ProjectStore, w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	projectName := vars["name"]
+
+	// check if project exists
+	project := p.GetProject(projectName)
+
+	if project.Name == "" {
+		sendJSONResponse(w, "No project with this name found", http.StatusNotFound)
+		return
+	}
+
+	// archive project
+	project.UnArchiveProject()
+
+	err := p.UpdateProject(project)
+
+	if err != nil {
+		sendJSONResponse(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	sendJSONResponse(w, "Project successfully unarchived", http.StatusOK)
+}
+
 func sendJSONResponse(w http.ResponseWriter, message string, code int) {
 	w.Header().Set("content-type", jsonContentType)
 	w.WriteHeader(code)

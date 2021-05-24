@@ -78,7 +78,7 @@ func TestPostProject(t *testing.T) {
 
 	t.Run("Creates new Project laundry", func(t *testing.T) {
 		requestBody := makeNewPostProjectBody(t, "laundry")
-		request, _ := http.NewRequest(http.MethodPost, "/projects/", requestBody)
+		request, _ := http.NewRequest(http.MethodPost, "/projects", requestBody)
 		response := httptest.NewRecorder()
 
 		server.Router.ServeHTTP(response, request)
@@ -89,7 +89,7 @@ func TestPostProject(t *testing.T) {
 
 	t.Run("Try to create a project that already exists", func(t *testing.T) {
 		requestBody := makeNewPostProjectBody(t, "homework")
-		request, _ := http.NewRequest(http.MethodPost, "/projects/", requestBody)
+		request, _ := http.NewRequest(http.MethodPost, "/projects", requestBody)
 		response := httptest.NewRecorder()
 
 		server.Router.ServeHTTP(response, request)
@@ -204,10 +204,48 @@ func TestArchiveProject(t *testing.T) {
 
 		server.Router.ServeHTTP(response, request)
 
-		assertProjectArchived(t, store, "homework")
-		assertResponseStatus(t, response.Code, 200)
+		assertProjectArchiveStatus(t, store, "homework", true)
+		assertResponseStatus(t, response.Code, http.StatusOK)
 	})
 
+	t.Run("Try to archive not existing project", func(t *testing.T) {
+		request, _ := http.NewRequest(http.MethodPut, "/projects/researchpaper/archive", nil)
+		response := httptest.NewRecorder()
+
+		server.Router.ServeHTTP(response, request)
+		assertResponseStatus(t, response.Code, http.StatusNotFound)
+	})
+}
+
+// Test for route DELETE /projects/{name}/archive
+func TestUnArchiveProject(t *testing.T) {
+	store := StubProjectStore{
+		map[string]bool{
+			"homework": false,
+			"cleaning": true,
+		},
+	}
+
+	// Uses the ProjectServer with our StubProjectStore
+	server := api.NewProjectServer(&store)
+
+	t.Run("unarchive project homework", func(t *testing.T) {
+		request, _ := http.NewRequest(http.MethodDelete, "/projects/cleaning/archive", nil)
+		response := httptest.NewRecorder()
+
+		server.Router.ServeHTTP(response, request)
+
+		assertProjectArchiveStatus(t, store, "homework", false)
+		assertResponseStatus(t, response.Code, http.StatusOK)
+	})
+
+	t.Run("Try to unarchive not existing project", func(t *testing.T) {
+		request, _ := http.NewRequest(http.MethodDelete, "/projects/researchpaper/archive", nil)
+		response := httptest.NewRecorder()
+
+		server.Router.ServeHTTP(response, request)
+		assertResponseStatus(t, response.Code, http.StatusNotFound)
+	})
 }
 
 func assertResponseBody(t testing.TB, got, want string) {
@@ -244,10 +282,10 @@ func assertError(t testing.TB, context string, err error) {
 	}
 }
 
-func assertProjectArchived(t *testing.T, store StubProjectStore, name string) {
+func assertProjectArchiveStatus(t *testing.T, store StubProjectStore, name string, want bool) {
 	t.Helper()
-	if archived := store.projects[name]; !archived {
-		t.Errorf("Project should have been archived")
+	if archived := store.projects[name]; archived != want {
+		t.Errorf("Project has wrong archive status - got %v, want %v", archived, want)
 	}
 }
 
