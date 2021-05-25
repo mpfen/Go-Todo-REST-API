@@ -13,7 +13,7 @@ type stubTask struct {
 	Priority  string
 	Deadline  *time.Time
 	Done      bool
-	ProjectID string // Name of project
+	ProjectID string
 }
 
 // DB store stub for testing
@@ -64,6 +64,23 @@ func (s *StubTodoStore) DeleteProject(name string) error {
 func (s *StubTodoStore) UpdateProject(project model.Project) error {
 	s.projects[project.Name] = project.Archived
 	return nil
+}
+
+// Gets Task from store
+func (s *StubTodoStore) GetTask(projectID, taskName string) model.Task {
+	for _, t := range s.tasks {
+		if t.Name == taskName && t.ProjectID == projectID {
+			return wrapStubTask(taskName)
+		}
+	}
+	return model.Task{}
+}
+
+// to comply with interface
+func wrapStubTask(taskName string) model.Task {
+	modelTask := model.Task{}
+	modelTask.Name = taskName
+	return modelTask
 }
 
 // common assert functions

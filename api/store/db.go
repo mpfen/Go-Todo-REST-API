@@ -18,6 +18,8 @@ type TodoStore interface {
 	GetAllProjects() []model.Project
 	DeleteProject(name string) error
 	UpdateProject(project model.Project) error
+
+	GetTask(projectID string, taskName string) model.Task
 }
 
 type Database struct {
@@ -69,6 +71,11 @@ func (d *Database) DeleteProject(name string) error {
 func (d *Database) UpdateProject(project model.Project) error {
 	err := d.DB.Save(&project).Error
 	return err
+}
+
+// Get a task
+func (d *Database) GetTask(projectID, taskName string) model.Task {
+	return model.Task{}
 }
 
 // creates database struct and runs automigrate
