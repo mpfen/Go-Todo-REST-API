@@ -9,10 +9,10 @@ import (
 	model "github.com/mpfen/Go-Todo-REST-API/api/model"
 )
 
-// ProjectStore interface for testing
+// TodoStore interface for testing
 // Tests use own implementation with
-// StubStore instead of a real database
-type ProjectStore interface {
+// StubTodoStore instead of a real database
+type TodoStore interface {
 	GetProject(name string) model.Project
 	PostProject(name string) error
 	GetAllProjects() []model.Project

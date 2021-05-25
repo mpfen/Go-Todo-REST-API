@@ -12,7 +12,7 @@ import (
 const jsonContentType = "application/json"
 
 // Handler for GET /project/{name}
-func GetProjectHandler(p store.ProjectStore, w http.ResponseWriter, r *http.Request) {
+func GetProjectHandler(p store.TodoStore, w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	projectName := vars["name"]
 
@@ -30,7 +30,7 @@ func GetProjectHandler(p store.ProjectStore, w http.ResponseWriter, r *http.Requ
 }
 
 // Handler for POST /projects/
-func PostProjectHandler(p store.ProjectStore, w http.ResponseWriter, r *http.Request) {
+func PostProjectHandler(p store.TodoStore, w http.ResponseWriter, r *http.Request) {
 	project := model.Project{}
 
 	decoder := json.NewDecoder(r.Body)
@@ -51,7 +51,7 @@ func PostProjectHandler(p store.ProjectStore, w http.ResponseWriter, r *http.Req
 }
 
 // Handler for GET /projects/
-func GetAllProjectsHandler(p store.ProjectStore, w http.ResponseWriter, r *http.Request) {
+func GetAllProjectsHandler(p store.TodoStore, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", jsonContentType)
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(p.GetAllProjects())
@@ -59,7 +59,7 @@ func GetAllProjectsHandler(p store.ProjectStore, w http.ResponseWriter, r *http.
 }
 
 // Handler for DELETE /projects/{name}
-func DeleteProjectHandler(p store.ProjectStore, w http.ResponseWriter, r *http.Request) {
+func DeleteProjectHandler(p store.TodoStore, w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	projectName := vars["name"]
 
@@ -84,7 +84,7 @@ func DeleteProjectHandler(p store.ProjectStore, w http.ResponseWriter, r *http.R
 }
 
 // Handler for PUT /projects/{name}
-func UpdateProjectHandler(p store.ProjectStore, w http.ResponseWriter, r *http.Request) {
+func UpdateProjectHandler(p store.TodoStore, w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	projectName := vars["name"]
 
@@ -118,7 +118,7 @@ func UpdateProjectHandler(p store.ProjectStore, w http.ResponseWriter, r *http.R
 }
 
 // Handler for PUT /projects/{name}/archive
-func ArchiveProjectHandler(p store.ProjectStore, w http.ResponseWriter, r *http.Request) {
+func ArchiveProjectHandler(p store.TodoStore, w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	projectName := vars["name"]
 
@@ -144,7 +144,7 @@ func ArchiveProjectHandler(p store.ProjectStore, w http.ResponseWriter, r *http.
 }
 
 // Handler for DELETE /projects/{name}/archive
-func UnArchiveProjectHandler(p store.ProjectStore, w http.ResponseWriter, r *http.Request) {
+func UnArchiveProjectHandler(p store.TodoStore, w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	projectName := vars["name"]
 

@@ -8,14 +8,14 @@ import (
 	"github.com/mpfen/Go-Todo-REST-API/api/store"
 )
 
-type ProjectServer struct {
+type TodoStore struct {
 	Router *mux.Router
-	Store  store.ProjectStore
+	Store  store.TodoStore
 }
 
-// Initalize ProjectServer and create a gorilla/mux Router
-func NewProjectServer(store store.ProjectStore) *ProjectServer {
-	p := new(ProjectServer)
+// Initalize TodoStore and create a gorilla/mux Router
+func NewTodoStore(store store.TodoStore) *TodoStore {
+	p := new(TodoStore)
 	p.Store = store
 
 	p.Router = mux.NewRouter()
@@ -31,30 +31,30 @@ func NewProjectServer(store store.ProjectStore) *ProjectServer {
 	return p
 }
 
-func (p *ProjectServer) GetProject(w http.ResponseWriter, r *http.Request) {
+func (p *TodoStore) GetProject(w http.ResponseWriter, r *http.Request) {
 	handler.GetProjectHandler(p.Store, w, r)
 }
 
-func (p *ProjectServer) PostProject(w http.ResponseWriter, r *http.Request) {
+func (p *TodoStore) PostProject(w http.ResponseWriter, r *http.Request) {
 	handler.PostProjectHandler(p.Store, w, r)
 }
 
-func (p *ProjectServer) GetAllProjects(w http.ResponseWriter, r *http.Request) {
+func (p *TodoStore) GetAllProjects(w http.ResponseWriter, r *http.Request) {
 	handler.GetAllProjectsHandler(p.Store, w, r)
 }
 
-func (p *ProjectServer) DeleteProject(w http.ResponseWriter, r *http.Request) {
+func (p *TodoStore) DeleteProject(w http.ResponseWriter, r *http.Request) {
 	handler.DeleteProjectHandler(p.Store, w, r)
 }
 
-func (p *ProjectServer) UpdateProject(w http.ResponseWriter, r *http.Request) {
+func (p *TodoStore) UpdateProject(w http.ResponseWriter, r *http.Request) {
 	handler.UpdateProjectHandler(p.Store, w, r)
 }
 
-func (p *ProjectServer) ArchiveProject(w http.ResponseWriter, r *http.Request) {
+func (p *TodoStore) ArchiveProject(w http.ResponseWriter, r *http.Request) {
 	handler.ArchiveProjectHandler(p.Store, w, r)
 }
 
-func (p *ProjectServer) UnArchiveProject(w http.ResponseWriter, r *http.Request) {
+func (p *TodoStore) UnArchiveProject(w http.ResponseWriter, r *http.Request) {
 	handler.UnArchiveProjectHandler(p.Store, w, r)
 }

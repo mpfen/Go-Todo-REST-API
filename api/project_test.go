@@ -13,16 +13,16 @@ import (
 )
 
 // Test setUp for all project tests
-func setUpProjectTests() (server *api.ProjectServer, store StubProjectStore) {
-	store = StubProjectStore{
+func setUpProjectTests() (server *api.TodoStore, store StubTodoStore) {
+	store = StubTodoStore{
 		map[string]bool{
 			"homework": false,
 			"cleaning": true,
-		},
+		}, []stubTask{},
 	}
 
-	// Uses the ProjectServer with our StubProjectStore
-	server = api.NewProjectServer(&store)
+	// Uses the TodoStore with our StubTodoStore
+	server = api.NewTodoStore(&store)
 	return server, store
 }
 
@@ -151,7 +151,7 @@ func TestPutProject(t *testing.T) {
 
 		server.Router.ServeHTTP(response, request)
 
-		// todo? not working with StubProjectStore implementation
+		// todo? not working with StubTodoStore implementation
 		// UpdateProject can not delete old project
 		// because it does not know the old projects name
 		// assertProjectDeleted(t, store, "homework")
@@ -207,21 +207,21 @@ func TestUnArchiveProject(t *testing.T) {
 }
 
 // assert functions specific to project tests
-func assertProjectCreated(t testing.TB, store StubProjectStore, name string) {
+func assertProjectCreated(t testing.TB, store StubTodoStore, name string) {
 	t.Helper()
 	if _, exists := store.projects[name]; !exists {
 		t.Errorf("project was not created")
 	}
 }
 
-func assertProjectDeleted(t testing.TB, store StubProjectStore, name string) {
+func assertProjectDeleted(t testing.TB, store StubTodoStore, name string) {
 	t.Helper()
 	if _, exists := store.projects[name]; exists {
 		t.Errorf("project was not deleted")
 	}
 }
 
-func assertProjectArchiveStatus(t *testing.T, store StubProjectStore, name string, want bool) {
+func assertProjectArchiveStatus(t *testing.T, store StubTodoStore, name string, want bool) {
 	t.Helper()
 	if archived := store.projects[name]; archived != want {
 		t.Errorf("Project has wrong archive status - got %v, want %v", archived, want)

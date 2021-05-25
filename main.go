@@ -10,7 +10,7 @@ import (
 
 func main() {
 	db := store.NewDatabaseConnection("database.db")
-	server := api.NewProjectServer(db)
+	server := api.NewTodoStore(db)
 
 	err := http.ListenAndServe(":5000", server.Router)
 

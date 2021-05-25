@@ -3,17 +3,27 @@ package api_test
 import (
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/mpfen/Go-Todo-REST-API/api/model"
 )
 
-// DB store stub for testing
-type StubProjectStore struct {
-	projects map[string]bool
+type stubTask struct {
+	Name      string
+	Priority  string
+	Deadline  *time.Time
+	Done      bool
+	ProjectID string // Name of project
 }
 
-// Creates a makeshift project struct to comply with ProjectStore interface
-func (s *StubProjectStore) GetProject(name string) model.Project {
+// DB store stub for testing
+type StubTodoStore struct {
+	projects map[string]bool
+	tasks    []stubTask
+}
+
+// Creates a makeshift project struct to comply with TodoStore interface
+func (s *StubTodoStore) GetProject(name string) model.Project {
 	project := model.Project{}
 	if _, exists := s.projects[name]; exists {
 		project.Name = name
@@ -24,7 +34,7 @@ func (s *StubProjectStore) GetProject(name string) model.Project {
 }
 
 // Creates a new project
-func (s *StubProjectStore) PostProject(name string) error {
+func (s *StubTodoStore) PostProject(name string) error {
 	if _, exists := s.projects[name]; exists {
 		return errors.New("project already created")
 	} else {
@@ -34,7 +44,7 @@ func (s *StubProjectStore) PostProject(name string) error {
 }
 
 // Returns an array of all projects
-func (s *StubProjectStore) GetAllProjects() []model.Project {
+func (s *StubTodoStore) GetAllProjects() []model.Project {
 	var projects []model.Project
 
 	for key := range s.projects {
@@ -45,13 +55,13 @@ func (s *StubProjectStore) GetAllProjects() []model.Project {
 }
 
 // Deletes a project from store
-func (s *StubProjectStore) DeleteProject(name string) error {
+func (s *StubTodoStore) DeleteProject(name string) error {
 	delete(s.projects, name)
 	return nil
 }
 
 // "Updates" a project in store
-func (s *StubProjectStore) UpdateProject(project model.Project) error {
+func (s *StubTodoStore) UpdateProject(project model.Project) error {
 	s.projects[project.Name] = project.Archived
 	return nil
 }
