@@ -27,7 +27,6 @@ func setUpProjectTests() (server *api.TodoStore, store StubTodoStore) {
 }
 
 // Tests for route GET /projects/{name}
-// todo update map to struct or array
 func TestGetProject(t *testing.T) {
 	server, _ := setUpProjectTests()
 
@@ -113,9 +112,11 @@ func TestGetAllProjects(t *testing.T) {
 			got[i] = project.Name
 		}
 
+		// sometimes the order of got changes at random to {"cleaning", "homework"}
 		want := [2]string{"homework", "cleaning"}
+		want2 := [2]string{"cleaning", "homework"}
 
-		if got != want {
+		if got != want && got != want2 {
 			t.Errorf("got %v, want %v", got, want)
 		}
 
