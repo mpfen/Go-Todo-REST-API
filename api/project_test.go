@@ -12,18 +12,24 @@ import (
 	"github.com/mpfen/Go-Todo-REST-API/api/model"
 )
 
-// Tests for route GET /projects/{name}
-// todo update map to struct or array
-func TestGetProject(t *testing.T) {
-	store := StubProjectStore{
+// Test setUp for all project tests
+func setUpProjectTests() (server *api.ProjectServer, store StubProjectStore) {
+	store = StubProjectStore{
 		map[string]bool{
 			"homework": false,
-			"cleaning": false,
+			"cleaning": true,
 		},
 	}
 
 	// Uses the ProjectServer with our StubProjectStore
-	server := api.NewProjectServer(&store)
+	server = api.NewProjectServer(&store)
+	return server, store
+}
+
+// Tests for route GET /projects/{name}
+// todo update map to struct or array
+func TestGetProject(t *testing.T) {
+	server, _ := setUpProjectTests()
 
 	t.Run("returns project homework", func(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/projects/homework", nil)
@@ -66,15 +72,7 @@ func TestGetProject(t *testing.T) {
 
 // Test for route POST /projects/
 func TestPostProject(t *testing.T) {
-	store := StubProjectStore{
-		map[string]bool{
-			"homework": false,
-			"cleaning": false,
-		},
-	}
-
-	// Uses the ProjectServer with our StubProjectStore
-	server := api.NewProjectServer(&store)
+	server, store := setUpProjectTests()
 
 	t.Run("Creates new Project laundry", func(t *testing.T) {
 		requestBody := makeNewPostProjectBody(t, "laundry")
@@ -100,15 +98,7 @@ func TestPostProject(t *testing.T) {
 
 // Test for route GET /projects
 func TestGetAllProjects(t *testing.T) {
-	store := StubProjectStore{
-		map[string]bool{
-			"homework": false,
-			"cleaning": false,
-		},
-	}
-
-	// Uses the ProjectServer with our StubProjectStore
-	server := api.NewProjectServer(&store)
+	server, _ := setUpProjectTests()
 
 	t.Run("Get all stored projects", func(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/projects", nil)
@@ -135,15 +125,7 @@ func TestGetAllProjects(t *testing.T) {
 
 // Test for route DEL /projects/{name}
 func TestDeleteProject(t *testing.T) {
-	store := StubProjectStore{
-		map[string]bool{
-			"homework": false,
-			"cleaning": false,
-		},
-	}
-
-	// Uses the ProjectServer with our StubProjectStore
-	server := api.NewProjectServer(&store)
+	server, store := setUpProjectTests()
 
 	t.Run("Delete project homework", func(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodDelete, "/projects/homework", nil)
@@ -159,15 +141,7 @@ func TestDeleteProject(t *testing.T) {
 
 // Test for route PUT /projects/{name}
 func TestPutProject(t *testing.T) {
-	store := StubProjectStore{
-		map[string]bool{
-			"homework": false,
-			"cleaning": false,
-		},
-	}
-
-	// Uses the ProjectServer with our StubProjectStore
-	server := api.NewProjectServer(&store)
+	server, store := setUpProjectTests()
 
 	t.Run("Change the name of project homework", func(t *testing.T) {
 		projectName := "researchpaper"
@@ -177,7 +151,7 @@ func TestPutProject(t *testing.T) {
 
 		server.Router.ServeHTTP(response, request)
 
-		// not working with StubProjectStore implementation
+		// todo? not working with StubProjectStore implementation
 		// UpdateProject can not delete old project
 		// because it does not know the old projects name
 		// assertProjectDeleted(t, store, "homework")
@@ -188,15 +162,7 @@ func TestPutProject(t *testing.T) {
 
 // Test for route PUT /projects/{name}/archive
 func TestArchiveProject(t *testing.T) {
-	store := StubProjectStore{
-		map[string]bool{
-			"homework": false,
-			"cleaning": false,
-		},
-	}
-
-	// Uses the ProjectServer with our StubProjectStore
-	server := api.NewProjectServer(&store)
+	server, store := setUpProjectTests()
 
 	t.Run("Archive project homework", func(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodPut, "/projects/homework/archive", nil)
@@ -219,15 +185,7 @@ func TestArchiveProject(t *testing.T) {
 
 // Test for route DELETE /projects/{name}/archive
 func TestUnArchiveProject(t *testing.T) {
-	store := StubProjectStore{
-		map[string]bool{
-			"homework": false,
-			"cleaning": true,
-		},
-	}
-
-	// Uses the ProjectServer with our StubProjectStore
-	server := api.NewProjectServer(&store)
+	server, store := setUpProjectTests()
 
 	t.Run("unarchive project homework", func(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodDelete, "/projects/cleaning/archive", nil)
@@ -248,20 +206,7 @@ func TestUnArchiveProject(t *testing.T) {
 	})
 }
 
-func assertResponseBody(t testing.TB, got, want string) {
-	t.Helper()
-	if got != want {
-		t.Errorf("got %q, want %q", got, want)
-	}
-}
-
-func assertResponseStatus(t testing.TB, got, want int) {
-	t.Helper()
-	if got != want {
-		t.Errorf("did not get correct status code, got %d, want %d", got, want)
-	}
-}
-
+// assert functions specific to project tests
 func assertProjectCreated(t testing.TB, store StubProjectStore, name string) {
 	t.Helper()
 	if _, exists := store.projects[name]; !exists {
@@ -273,12 +218,6 @@ func assertProjectDeleted(t testing.TB, store StubProjectStore, name string) {
 	t.Helper()
 	if _, exists := store.projects[name]; exists {
 		t.Errorf("project was not deleted")
-	}
-}
-
-func assertError(t testing.TB, context string, err error) {
-	if err != nil {
-		t.Errorf("error - %v: %v", context, err)
 	}
 }
 

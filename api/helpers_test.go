@@ -2,6 +2,7 @@ package api_test
 
 import (
 	"errors"
+	"testing"
 
 	"github.com/mpfen/Go-Todo-REST-API/api/model"
 )
@@ -53,4 +54,25 @@ func (s *StubProjectStore) DeleteProject(name string) error {
 func (s *StubProjectStore) UpdateProject(project model.Project) error {
 	s.projects[project.Name] = project.Archived
 	return nil
+}
+
+// common assert functions
+func assertResponseBody(t testing.TB, got, want string) {
+	t.Helper()
+	if got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+func assertResponseStatus(t testing.TB, got, want int) {
+	t.Helper()
+	if got != want {
+		t.Errorf("did not get correct status code, got %d, want %d", got, want)
+	}
+}
+
+func assertError(t testing.TB, context string, err error) {
+	if err != nil {
+		t.Errorf("error - %v: %v", context, err)
+	}
 }
