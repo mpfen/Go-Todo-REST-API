@@ -2,7 +2,6 @@ package api_test
 
 import (
 	"errors"
-	"fmt"
 	"testing"
 	"time"
 
@@ -88,9 +87,8 @@ func (s *StubTodoStore) PostTask(task model.Task) error {
 	// todo - append to []Tasks does not work
 	// newTask := stubTask{Name: task.Name}
 	// s.Tasks = append(s.Tasks, newTask)
-	s.Tasks[0].Name = task.Name
+	s.Tasks[1].Name = "biology"
 
-	fmt.Println("Post Task", s.Tasks)
 	return nil
 }
 

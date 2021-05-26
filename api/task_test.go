@@ -87,7 +87,7 @@ func TestPostTask(t *testing.T) {
 
 	t.Run("Post a new Task for project homework", func(t *testing.T) {
 		requestBody := makeNewPostTaskBody(t, "biology", "homework")
-		request, _ := http.NewRequest(http.MethodPost, "/projects/homework/task/biology", requestBody)
+		request, _ := http.NewRequest(http.MethodPost, "/projects/homework/task", requestBody)
 		response := httptest.NewRecorder()
 
 		server.Router.ServeHTTP(response, request)
@@ -129,9 +129,7 @@ func makeNewPostTaskBody(t *testing.T, taskName, projectName string) *bytes.Buff
 // assert functions specific for tasks
 func assertTaskCreated(t testing.TB, store StubTodoStore, name string) {
 	t.Helper()
-	t.Log(store)
 	for _, task := range store.Tasks {
-		t.Log(task)
 		if task.Name == name {
 			return
 		}
