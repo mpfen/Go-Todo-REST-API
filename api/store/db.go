@@ -20,6 +20,7 @@ type TodoStore interface {
 	UpdateProject(project model.Project) error
 
 	GetTask(projectID string, taskName string) model.Task
+	PostTask(task model.Task) error
 }
 
 type Database struct {
@@ -75,7 +76,23 @@ func (d *Database) UpdateProject(project model.Project) error {
 
 // Get a task
 func (d *Database) GetTask(projectID, taskName string) model.Task {
-	return model.Task{}
+	// todo check for project id
+	task := model.Task{}
+	err := d.DB.Find(&task, "Name = ?", taskName).Error
+
+	if err != nil {
+		return model.Task{}
+	}
+
+	return task
+}
+
+// Create  a Task
+func (d *Database) PostTask(task model.Task) error {
+	// todo set project id
+	err := d.DB.Create(&task).Error
+
+	return err
 }
 
 // creates database struct and runs automigrate

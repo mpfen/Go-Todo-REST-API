@@ -1,6 +1,7 @@
 package api_test
 
 import (
+	"bytes"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -78,6 +79,22 @@ func TestGetTask(t *testing.T) {
 		assertResponseBody(t, got.Name, want)
 		assertResponseStatus(t, response.Code, http.StatusNotFound)
 	})
+}
+
+// Tests for route POST /projects/{projectName}/tasks/{taskName}
+func TestPostTask(t *testing.T) {
+	server, store := setupTaskTests()
+
+	t.Run("Post a new Task for project homework", func(t *testing.T) {
+		requestBody := makeNewPostTaskBody(t, "biology", "homework")
+		request, _ := http.NewRequest(http.MethodPost, "/projects/homework/task/biology", requestBody)
+		response := httptest.NewRecorder()
+
+		server.Router.ServeHTTP(response, request)
+
+		assertResponseStatus(t, response.Code, http.StatusCreated)
+		assertTaskCreated(t, store, "biology")
+	})
 
 }
 
@@ -93,4 +110,31 @@ func decodeTaskFromResponse(t testing.TB, rdr io.Reader) stubTask {
 	}
 
 	return task
+}
+
+func makeNewPostTaskBody(t *testing.T, taskName, projectName string) *bytes.Buffer {
+	requestBody, err := json.Marshal(map[string]string{
+		"name":      taskName,
+		"ProjectID": projectName,
+	})
+
+	if err != nil {
+		t.Errorf("Failed to make requestBody: %s", err)
+	}
+
+	return bytes.NewBuffer(requestBody)
+
+}
+
+// assert functions specific for tasks
+func assertTaskCreated(t testing.TB, store StubTodoStore, name string) {
+	t.Helper()
+	t.Log(store)
+	for _, task := range store.Tasks {
+		t.Log(task)
+		if task.Name == name {
+			return
+		}
+	}
+	t.Errorf("Task %v was not created", name)
 }

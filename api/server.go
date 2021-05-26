@@ -31,6 +31,7 @@ func NewTodoStore(store store.TodoStore) *TodoStore {
 
 	// Task routes
 	p.Router.HandleFunc("/projects/{projectName}/task/{taskName}", p.GetTask).Methods("GET")
+	p.Router.HandleFunc("/projects/{projectName}/task", p.PostTask).Methods("POST")
 
 	return p
 }
@@ -68,4 +69,8 @@ func (p *TodoStore) UnArchiveProject(w http.ResponseWriter, r *http.Request) {
 
 func (p *TodoStore) GetTask(w http.ResponseWriter, r *http.Request) {
 	handler.GetTaskHandler(p.Store, w, r)
+}
+
+func (p *TodoStore) PostTask(w http.ResponseWriter, r *http.Request) {
+	handler.PostTaskHandler(p.Store, w, r)
 }

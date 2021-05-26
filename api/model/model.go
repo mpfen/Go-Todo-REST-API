@@ -14,7 +14,7 @@ type Project struct {
 }
 
 func DbMigrate(db *gorm.DB) *gorm.DB {
-	db.AutoMigrate(&Project{})
+	db.AutoMigrate(&Project{}, &Task{})
 	return db
 }
 
@@ -29,7 +29,7 @@ func (p *Project) UnArchiveProject() {
 type Task struct {
 	gorm.Model
 	Name      string     `json:"name"`
-	Priority  string     `gorm:"type:ENUM('0', '1', '2', '3');default:'0'" json:"priority"`
+	Priority  string     `json:"priority"`
 	Deadline  *time.Time `gorm:"default:null" json:"deadline"`
 	Done      bool       `json:"done"`
 	ProjectID uint       `json:"project_id"`

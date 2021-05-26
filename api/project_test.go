@@ -18,7 +18,7 @@ func setUpProjectTests() (server *api.TodoStore, store StubTodoStore) {
 		map[string]bool{
 			"homework": false,
 			"cleaning": true,
-		}, []stubTask{},
+		}, []stubTask{{}},
 	}
 
 	// Uses the TodoStore with our StubTodoStore
@@ -210,21 +210,21 @@ func TestUnArchiveProject(t *testing.T) {
 // assert functions specific to project tests
 func assertProjectCreated(t testing.TB, store StubTodoStore, name string) {
 	t.Helper()
-	if _, exists := store.projects[name]; !exists {
+	if _, exists := store.Projects[name]; !exists {
 		t.Errorf("project was not created")
 	}
 }
 
 func assertProjectDeleted(t testing.TB, store StubTodoStore, name string) {
 	t.Helper()
-	if _, exists := store.projects[name]; exists {
+	if _, exists := store.Projects[name]; exists {
 		t.Errorf("project was not deleted")
 	}
 }
 
 func assertProjectArchiveStatus(t *testing.T, store StubTodoStore, name string, want bool) {
 	t.Helper()
-	if archived := store.projects[name]; archived != want {
+	if archived := store.Projects[name]; archived != want {
 		t.Errorf("Project has wrong archive status - got %v, want %v", archived, want)
 	}
 }
@@ -243,7 +243,7 @@ func decodeProjectFromResponse(t testing.TB, rdr io.Reader) model.Project {
 	return project
 }
 
-// Decodes the response body to a project struct
+// Decodes the response body to an array of project struct
 func decodeAllProjectsFromResponse(t testing.TB, rdr io.Reader) []model.Project {
 	t.Helper()
 

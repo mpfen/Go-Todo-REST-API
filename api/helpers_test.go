@@ -2,6 +2,7 @@ package api_test
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 	"time"
 
@@ -18,14 +19,14 @@ type stubTask struct {
 
 // DB store stub for testing
 type StubTodoStore struct {
-	projects map[string]bool
-	tasks    []stubTask
+	Projects map[string]bool
+	Tasks    []stubTask
 }
 
 // Creates a makeshift project struct to comply with TodoStore interface
 func (s *StubTodoStore) GetProject(name string) model.Project {
 	project := model.Project{}
-	if _, exists := s.projects[name]; exists {
+	if _, exists := s.Projects[name]; exists {
 		project.Name = name
 		return project
 	} else {
@@ -35,10 +36,10 @@ func (s *StubTodoStore) GetProject(name string) model.Project {
 
 // Creates a new project
 func (s *StubTodoStore) PostProject(name string) error {
-	if _, exists := s.projects[name]; exists {
+	if _, exists := s.Projects[name]; exists {
 		return errors.New("project already created")
 	} else {
-		s.projects[name] = false
+		s.Projects[name] = false
 		return nil
 	}
 }
@@ -47,7 +48,7 @@ func (s *StubTodoStore) PostProject(name string) error {
 func (s *StubTodoStore) GetAllProjects() []model.Project {
 	var projects []model.Project
 
-	for key := range s.projects {
+	for key := range s.Projects {
 		projects = append(projects, model.Project{Name: key})
 	}
 
@@ -56,24 +57,41 @@ func (s *StubTodoStore) GetAllProjects() []model.Project {
 
 // Deletes a project from store
 func (s *StubTodoStore) DeleteProject(name string) error {
-	delete(s.projects, name)
+	delete(s.Projects, name)
 	return nil
 }
 
 // "Updates" a project in store
 func (s *StubTodoStore) UpdateProject(project model.Project) error {
-	s.projects[project.Name] = project.Archived
+	s.Projects[project.Name] = project.Archived
 	return nil
 }
 
 // Gets Task from store
 func (s *StubTodoStore) GetTask(projectID, taskName string) model.Task {
-	for _, t := range s.tasks {
+	for _, t := range s.Tasks {
 		if t.Name == taskName && t.ProjectID == projectID {
 			return wrapStubTask(taskName)
 		}
 	}
 	return model.Task{}
+}
+
+// Create task in store
+func (s *StubTodoStore) PostTask(task model.Task) error {
+	for _, t := range s.Tasks {
+		if t.Name == task.Name {
+			return errors.New("Task already exists")
+		}
+	}
+
+	// todo - append to []Tasks does not work
+	// newTask := stubTask{Name: task.Name}
+	// s.Tasks = append(s.Tasks, newTask)
+	s.Tasks[0].Name = task.Name
+
+	fmt.Println("Post Task", s.Tasks)
+	return nil
 }
 
 // to comply with interface
