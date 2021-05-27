@@ -1,6 +1,7 @@
 package store
 
 import (
+	"errors"
 	"log"
 
 	"gorm.io/driver/sqlite"
@@ -89,6 +90,13 @@ func (d *Database) GetTask(projectID, taskName string) model.Task {
 
 // Create  a Task
 func (d *Database) PostTask(task model.Task) error {
+	// check for existing task since task.Name is not unique
+	checkTask := d.GetTask("", task.Name)
+
+	if checkTask.Name != "" {
+		return errors.New("task already exists")
+	}
+
 	// todo set project id
 	err := d.DB.Create(&task).Error
 
