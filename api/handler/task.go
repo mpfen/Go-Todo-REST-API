@@ -10,7 +10,7 @@ import (
 	"github.com/mpfen/Go-Todo-REST-API/api/store"
 )
 
-// Handler for GET /projects/{projectName}/tasks/{taskName}
+// Handler for GET /projects/{projectName}/task/{taskName}
 func GetTaskHandler(p store.TodoStore, w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	projectName := vars["projectName"]
@@ -29,7 +29,7 @@ func GetTaskHandler(p store.TodoStore, w http.ResponseWriter, r *http.Request) {
 
 }
 
-// Handler for POST /projects/{projectName}/tasks/{taskName}
+// Handler for POST /projects/{projectName}/task/{taskName}
 func PostTaskHandler(p store.TodoStore, w http.ResponseWriter, r *http.Request) {
 	// Decode task from request
 	task := model.Task{}
@@ -72,4 +72,29 @@ func PostTaskHandler(p store.TodoStore, w http.ResponseWriter, r *http.Request) 
 	}
 
 	sendJSONResponse(w, fmt.Sprintf("Task %v for project %v created", taskName, projectName), http.StatusCreated)
+}
+
+// Handler for route GET /project/{projectName}/task
+func GetAllProjectTasksHandler(p store.TodoStore, w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	projectName := vars["projectName"]
+	// Check if projects exists
+	project := p.GetProject(projectName)
+
+	if project.Name == "" {
+		sendJSONResponse(w, "No project with that name exists", http.StatusBadRequest)
+		return
+	}
+
+	// Get all tasks
+	tasks := p.GetAllProjectTasks(project)
+
+	if len(tasks) == 0 {
+		sendJSONResponse(w, fmt.Sprintf("No tasks in project %v found", projectName), http.StatusNotFound)
+		return
+	} else {
+		w.Header().Set("content-type", jsonContentType)
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(tasks)
+	}
 }

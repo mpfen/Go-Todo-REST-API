@@ -18,6 +18,7 @@ func setupTaskTests() (server *api.TodoStore, store StubTodoStore) {
 		map[string]bool{
 			"homework": false,
 			"cleaning": true,
+			"school":   false,
 		},
 		[]stubTask{{Name: "math",
 			Priority:  "1",
@@ -29,8 +30,12 @@ func setupTaskTests() (server *api.TodoStore, store StubTodoStore) {
 			Deadline:  &time,
 			Done:      false,
 			ProjectID: "cleaning",
-		},
-		},
+		}, {Name: "physics",
+			Priority:  "1",
+			Deadline:  &time,
+			Done:      false,
+			ProjectID: "homework",
+		}},
 	}
 	// Uses the TodoStore with our StubTodoStore
 	server = api.NewTodoStore(&store)
@@ -117,6 +122,37 @@ func TestPostTask(t *testing.T) {
 	})
 }
 
+// Test for getting all task of a project GET /projects/{projectName}/tasks
+func TestGetAllTasksOfAProject(t *testing.T) {
+	server, store := setupTaskTests()
+
+	t.Run("Get all task from project homework", func(t *testing.T) {
+		request, _ := http.NewRequest(http.MethodGet, "/projects/homework/task", nil)
+		response := httptest.NewRecorder()
+
+		server.Router.ServeHTTP(response, request)
+
+		assertResponseStatus(t, response.Code, http.StatusOK)
+		want := []stubTask{}
+		want = append(want, store.Tasks[0], store.Tasks[2])
+		got := decodeMultipleTaskFromResponse(t, response.Body)
+		t.Log(want)
+		t.Log(got)
+
+		assertTaskList(t, got, want)
+	})
+
+	t.Run("Try to get task from a project without tasks", func(t *testing.T) {
+		request, _ := http.NewRequest(http.MethodGet, "/projects/school/task", nil)
+		response := httptest.NewRecorder()
+
+		server.Router.ServeHTTP(response, request)
+
+		assertResponseStatus(t, response.Code, http.StatusNotFound)
+	})
+
+}
+
 // Decodes the response body to a task struct
 func decodeTaskFromResponse(t testing.TB, rdr io.Reader) stubTask {
 	t.Helper()
@@ -129,6 +165,20 @@ func decodeTaskFromResponse(t testing.TB, rdr io.Reader) stubTask {
 	}
 
 	return task
+}
+
+// Decodes the response body to a task struct
+func decodeMultipleTaskFromResponse(t testing.TB, rdr io.Reader) []stubTask {
+	t.Helper()
+
+	var tasks []stubTask
+
+	err := json.NewDecoder(rdr).Decode(&tasks)
+	if err != nil {
+		t.Errorf("problem parsing task, %v", err)
+	}
+
+	return tasks
 }
 
 func makeNewPostTaskBody(t *testing.T, taskName, projectName string) *bytes.Buffer {
@@ -154,4 +204,12 @@ func assertTaskCreated(t testing.TB, store StubTodoStore, name string) {
 		}
 	}
 	t.Errorf("Task %v was not created", name)
+}
+
+func assertTaskList(t testing.TB, got, want []stubTask) {
+	for i, task := range got {
+		if task.Name != want[i].Name {
+			t.Errorf("List of Tasks not matching: got %v want %v", task.Name, want[i].Name)
+		}
+	}
 }

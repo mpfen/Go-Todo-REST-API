@@ -46,14 +46,32 @@ func populateTestDatabaseProjects(t *testing.T, db *store.Database) {
 	err := db.PostProject("homework")
 
 	if err != nil {
-		t.Fatalf("Error populating test database: %v", err)
+		t.Fatalf("Error populating test database with projects: %v", err)
 		return
 	}
 
 	err = db.PostProject("cleaning")
 
 	if err != nil {
-		t.Fatalf("Error populating test database: %v", err)
+		t.Fatalf("Error populating test database with projects: %v", err)
+	}
+}
+
+// populate test database with tasks
+func populateTestDatabaseTasks(t *testing.T, db *store.Database) {
+	taskBiology := model.Task{Name: "biology", ProjectID: uint(2)}
+	err := db.PostTask(taskBiology)
+
+	if err != nil {
+		t.Fatalf("Error populating test database with tasks: %v", err)
+		return
+	}
+
+	taskPhysic := model.Task{Name: "physic", ProjectID: uint(2)}
+	err = db.PostTask(taskPhysic)
+
+	if err != nil {
+		t.Fatalf("Error populating test database with tasks: %v", err)
 	}
 }
 
@@ -153,6 +171,27 @@ func TestDatabase(t *testing.T) {
 
 		if task.Name == "" {
 			t.Error("Newly created Task not found")
+		}
+	})
+
+	populateTestDatabaseTasks(t, db)
+
+	// GetAllProjectTasks(projectName string) []model.Task
+	t.Run("Get all tasks from project homework", func(t *testing.T) {
+		project := db.GetProject("homework")
+		tasks := db.GetAllProjectTasks(project)
+
+		if len(tasks) != 3 {
+			t.Errorf("Not the right numbers of tasks found: got %v want %v", len(tasks), 3)
+		}
+	})
+
+	t.Run("Get all tasks from a project without tasks", func(t *testing.T) {
+		project := db.GetProject("cleaning")
+		tasks := db.GetAllProjectTasks(project)
+
+		if len(tasks) != 0 {
+			t.Errorf("Not the right numbers of tasks found: got %v want %v", len(tasks), 3)
 		}
 	})
 }

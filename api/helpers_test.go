@@ -92,6 +92,18 @@ func (s *StubTodoStore) PostTask(task model.Task) error {
 	return nil
 }
 
+// Return all tasks of a project
+func (s *StubTodoStore) GetAllProjectTasks(project model.Project) []model.Task {
+	tasks := []model.Task{}
+
+	for _, t := range s.Tasks {
+		if t.ProjectID == project.Name {
+			tasks = append(tasks, wrapStubTask(t.Name))
+		}
+	}
+	return tasks
+}
+
 // to comply with interface
 func wrapStubTask(taskName string) model.Task {
 	modelTask := model.Task{}
