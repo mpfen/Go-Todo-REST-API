@@ -45,6 +45,24 @@ func PostTaskHandler(p store.TodoStore, w http.ResponseWriter, r *http.Request) 
 	projectName := vars["projectName"]
 	taskName := task.Name
 
+	// Check if project exists and get its id
+	project := p.GetProject(projectName)
+
+	if project.Name == "" {
+		sendJSONResponse(w, "No Project with that name exists", http.StatusBadRequest)
+		return
+	}
+
+	task.ProjectID = project.ID
+
+	// Check if the task already exists
+	duplicateTask := p.GetTask(projectName, taskName)
+
+	if duplicateTask.Name != "" {
+		sendJSONResponse(w, "A Task with that name already exists for this project", http.StatusBadRequest)
+		return
+	}
+
 	// Create new task
 	err := p.PostTask(task)
 

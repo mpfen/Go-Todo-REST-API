@@ -85,7 +85,7 @@ func TestGetTask(t *testing.T) {
 func TestPostTask(t *testing.T) {
 	server, store := setupTaskTests()
 
-	t.Run("Post a new Task for project homework", func(t *testing.T) {
+	t.Run("Create a new task for project homework", func(t *testing.T) {
 		requestBody := makeNewPostTaskBody(t, "biology", "homework")
 		request, _ := http.NewRequest(http.MethodPost, "/projects/homework/task", requestBody)
 		response := httptest.NewRecorder()
@@ -96,6 +96,25 @@ func TestPostTask(t *testing.T) {
 		assertTaskCreated(t, store, "biology")
 	})
 
+	t.Run("Try to create an already existing task", func(t *testing.T) {
+		requestBody := makeNewPostTaskBody(t, "biology", "homework")
+		request, _ := http.NewRequest(http.MethodPost, "/projects/homework/task", requestBody)
+		response := httptest.NewRecorder()
+
+		server.Router.ServeHTTP(response, request)
+
+		assertResponseStatus(t, response.Code, http.StatusBadRequest)
+	})
+
+	t.Run("Try to create a task for a not existing project", func(t *testing.T) {
+		requestBody := makeNewPostTaskBody(t, "biology", "school")
+		request, _ := http.NewRequest(http.MethodPost, "/projects/school/task", requestBody)
+		response := httptest.NewRecorder()
+
+		server.Router.ServeHTTP(response, request)
+
+		assertResponseStatus(t, response.Code, http.StatusBadRequest)
+	})
 }
 
 // Decodes the response body to a task struct

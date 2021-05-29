@@ -1,7 +1,6 @@
 package store
 
 import (
-	"errors"
 	"log"
 
 	"gorm.io/driver/sqlite"
@@ -20,7 +19,7 @@ type TodoStore interface {
 	DeleteProject(name string) error
 	UpdateProject(project model.Project) error
 
-	GetTask(projectID string, taskName string) model.Task
+	GetTask(projectName, taskName string) model.Task
 	PostTask(task model.Task) error
 }
 
@@ -75,11 +74,29 @@ func (d *Database) UpdateProject(project model.Project) error {
 	return err
 }
 
+// Get project by ID
+func (d *Database) GetProjectByID(id uint) model.Project {
+	project := model.Project{}
+	err := d.DB.Find(&project, id).Error
+
+	if err != nil {
+		return model.Project{}
+	}
+
+	return project
+}
+
 // Get a task
-func (d *Database) GetTask(projectID, taskName string) model.Task {
-	// todo check for project id
+func (d *Database) GetTask(projectName, taskName string) model.Task {
+	project := model.Project{}
+	err := d.DB.Find(&project, "Name = ?", projectName).Error
+
+	if err != nil {
+		return model.Task{}
+	}
+
 	task := model.Task{}
-	err := d.DB.Find(&task, "Name = ?", taskName).Error
+	err = d.DB.Find(&task, "Name = ? AND Project_ID = ?", taskName, project.ID).Error
 
 	if err != nil {
 		return model.Task{}
@@ -88,19 +105,19 @@ func (d *Database) GetTask(projectID, taskName string) model.Task {
 	return task
 }
 
-// Create  a Task
+// Create a Task
 func (d *Database) PostTask(task model.Task) error {
-	// check for existing task since task.Name is not unique
-	checkTask := d.GetTask("", task.Name)
-
-	if checkTask.Name != "" {
-		return errors.New("task already exists")
-	}
-
-	// todo set project id
 	err := d.DB.Create(&task).Error
 
-	return err
+	if err != nil {
+		return err
+	}
+
+	// Update Project Tasks
+	project := model.Project{}
+	d.DB.Find(&project, task.ID)
+	project.Tasks = append(project.Tasks, task)
+	return d.DB.Save(task).Error
 }
 
 // creates database struct and runs automigrate

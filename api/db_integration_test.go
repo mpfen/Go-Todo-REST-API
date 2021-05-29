@@ -143,7 +143,7 @@ func TestDatabase(t *testing.T) {
 	// PostTask(task model.Task) error
 	// GetTask(projectID string, taskName string) model.Task
 	t.Run("Create a new task math for project homework", func(t *testing.T) {
-		taskMath := model.Task{Name: "math"}
+		taskMath := model.Task{Name: "math", ProjectID: uint(2)}
 
 		err := db.PostTask(taskMath)
 
@@ -155,15 +155,4 @@ func TestDatabase(t *testing.T) {
 			t.Error("Newly created Task not found")
 		}
 	})
-
-	t.Run("Try to create an existing task", func(t *testing.T) {
-		taskMath := model.Task{Name: "math"}
-
-		err := db.PostTask(taskMath)
-
-		if err == nil {
-			t.Error("Task should not have been created")
-		}
-	})
-
 }
