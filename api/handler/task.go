@@ -49,7 +49,7 @@ func PostTaskHandler(p store.TodoStore, w http.ResponseWriter, r *http.Request) 
 	project := p.GetProject(projectName)
 
 	if project.Name == "" {
-		sendJSONResponse(w, "No Project with that name exists", http.StatusBadRequest)
+		sendJSONResponse(w, "No Project with that name exists", http.StatusNotFound)
 		return
 	}
 
@@ -59,7 +59,7 @@ func PostTaskHandler(p store.TodoStore, w http.ResponseWriter, r *http.Request) 
 	duplicateTask := p.GetTask(projectName, taskName)
 
 	if duplicateTask.Name != "" {
-		sendJSONResponse(w, "A Task with that name already exists for this project", http.StatusBadRequest)
+		sendJSONResponse(w, "A Task with that name already exists for this project", http.StatusNotFound)
 		return
 	}
 
@@ -82,7 +82,7 @@ func GetAllProjectTasksHandler(p store.TodoStore, w http.ResponseWriter, r *http
 	project := p.GetProject(projectName)
 
 	if project.Name == "" {
-		sendJSONResponse(w, "No project with that name exists", http.StatusBadRequest)
+		sendJSONResponse(w, "No project with that name exists", http.StatusNotFound)
 		return
 	}
 
@@ -96,5 +96,29 @@ func GetAllProjectTasksHandler(p store.TodoStore, w http.ResponseWriter, r *http
 		w.Header().Set("content-type", jsonContentType)
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(tasks)
+	}
+}
+
+// Handler for route DELETE /projects/{projectName}/task/{taskName}
+func DeleteTaskHandler(p store.TodoStore, w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	projectName := vars["projectName"]
+	taskName := vars["taskName"]
+
+	// Check if tasks exists
+	task := p.GetTask(projectName, taskName)
+
+	if task.Name == "" {
+		sendJSONResponse(w, "No task with that name exists", http.StatusNotFound)
+		return
+	}
+
+	// Delete task
+	err := p.DeleteTask(task)
+
+	if err != nil {
+		sendJSONResponse(w, fmt.Sprintf("Problem deleting Task: %v", err), http.StatusInternalServerError)
+	} else {
+		sendJSONResponse(w, "Task was successfully deleted", http.StatusOK)
 	}
 }

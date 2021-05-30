@@ -33,6 +33,7 @@ func NewTodoStore(store store.TodoStore) *TodoStore {
 	p.Router.HandleFunc("/projects/{projectName}/task/{taskName}", p.GetTask).Methods("GET")
 	p.Router.HandleFunc("/projects/{projectName}/task", p.PostTask).Methods("POST")
 	p.Router.HandleFunc("/projects/{projectName}/task", p.GetAllProjectTasks).Methods("GET")
+	p.Router.HandleFunc("/projects/{projectName}/task/{taskName}", p.DeleteTask).Methods("DELETE")
 	return p
 }
 
@@ -77,4 +78,8 @@ func (p *TodoStore) PostTask(w http.ResponseWriter, r *http.Request) {
 
 func (p *TodoStore) GetAllProjectTasks(w http.ResponseWriter, r *http.Request) {
 	handler.GetAllProjectTasksHandler(p.Store, w, r)
+}
+
+func (p *TodoStore) DeleteTask(w http.ResponseWriter, r *http.Request) {
+	handler.DeleteTaskHandler(p.Store, w, r)
 }

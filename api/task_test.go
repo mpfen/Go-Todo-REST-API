@@ -72,7 +72,7 @@ func TestGetTask(t *testing.T) {
 		assertResponseStatus(t, response.Code, http.StatusNotFound)
 	})
 
-	t.Run("Try to get not existing Task", func(t *testing.T) {
+	t.Run("Try to get nonexisting Task", func(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/projects/homework/task/biology", nil)
 		response := httptest.NewRecorder()
 
@@ -111,14 +111,14 @@ func TestPostTask(t *testing.T) {
 		assertResponseStatus(t, response.Code, http.StatusBadRequest)
 	})
 
-	t.Run("Try to create a task for a not existing project", func(t *testing.T) {
-		requestBody := makeNewPostTaskBody(t, "biology", "school")
-		request, _ := http.NewRequest(http.MethodPost, "/projects/school/task", requestBody)
+	t.Run("Try to create a task for a nonexisting project", func(t *testing.T) {
+		requestBody := makeNewPostTaskBody(t, "biology", "homework2")
+		request, _ := http.NewRequest(http.MethodPost, "/projects/homework2/task", requestBody)
 		response := httptest.NewRecorder()
 
 		server.Router.ServeHTTP(response, request)
-
-		assertResponseStatus(t, response.Code, http.StatusBadRequest)
+		t.Log(response.Body)
+		assertResponseStatus(t, response.Code, http.StatusNotFound)
 	})
 }
 
@@ -136,8 +136,6 @@ func TestGetAllTasksOfAProject(t *testing.T) {
 		want := []stubTask{}
 		want = append(want, store.Tasks[0], store.Tasks[2])
 		got := decodeMultipleTaskFromResponse(t, response.Body)
-		t.Log(want)
-		t.Log(got)
 
 		assertTaskList(t, got, want)
 	})
@@ -151,6 +149,30 @@ func TestGetAllTasksOfAProject(t *testing.T) {
 		assertResponseStatus(t, response.Code, http.StatusNotFound)
 	})
 
+}
+
+// Test for deleting a task DELETE /projects{projectName}/task/{taskName}
+func TestDeleteTask(t *testing.T) {
+	server, store := setupTaskTests()
+
+	t.Run("Delete task math from project homework", func(t *testing.T) {
+		request, _ := http.NewRequest(http.MethodDelete, "/projects/homework/task/math", nil)
+		response := httptest.NewRecorder()
+
+		server.Router.ServeHTTP(response, request)
+
+		assertResponseStatus(t, response.Code, http.StatusOK)
+		assertTaskDeleted(t, store, "homework", "math")
+	})
+
+	t.Run("Try to delete nonexisting task", func(t *testing.T) {
+		request, _ := http.NewRequest(http.MethodDelete, "/projects/homework/task/science", nil)
+		response := httptest.NewRecorder()
+
+		server.Router.ServeHTTP(response, request)
+
+		assertResponseStatus(t, response.Code, http.StatusNotFound)
+	})
 }
 
 // Decodes the response body to a task struct
@@ -210,6 +232,16 @@ func assertTaskList(t testing.TB, got, want []stubTask) {
 	for i, task := range got {
 		if task.Name != want[i].Name {
 			t.Errorf("List of Tasks not matching: got %v want %v", task.Name, want[i].Name)
+		}
+	}
+}
+
+func assertTaskDeleted(t *testing.T, store StubTodoStore, projectName, taskName string) {
+	t.Helper()
+
+	for _, task := range store.Tasks {
+		if task.Name == taskName && task.ProjectID == projectName {
+			t.Errorf("Task %v was not deleted", taskName)
 		}
 	}
 }

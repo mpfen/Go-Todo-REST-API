@@ -10,6 +10,7 @@ package api_test
 //
 // GetTask(projectID string, taskName string) model.Task
 // PostTask(task model.Task) error
+// DeleteTask(task model.Task) error
 
 import (
 	"io/ioutil"
@@ -193,5 +194,13 @@ func TestDatabase(t *testing.T) {
 		if len(tasks) != 0 {
 			t.Errorf("Not the right numbers of tasks found: got %v want %v", len(tasks), 3)
 		}
+	})
+
+	// DeleteTask(task model.Task) error
+	t.Run("Delete a task", func(t *testing.T) {
+		task := db.GetTask("homework", "math")
+		err := db.DeleteTask(task)
+
+		assertError(t, "Task should have been deleted", err)
 	})
 }

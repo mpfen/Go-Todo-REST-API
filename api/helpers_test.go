@@ -104,6 +104,17 @@ func (s *StubTodoStore) GetAllProjectTasks(project model.Project) []model.Task {
 	return tasks
 }
 
+// Delete a tasks from the store
+func (s *StubTodoStore) DeleteTask(task model.Task) error {
+	for i, storeTask := range s.Tasks {
+		if storeTask.Name == task.Name {
+			s.Tasks[i].Name = ""
+			return nil
+		}
+	}
+	return nil
+}
+
 // to comply with interface
 func wrapStubTask(taskName string) model.Task {
 	modelTask := model.Task{}
