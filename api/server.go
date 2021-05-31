@@ -35,7 +35,8 @@ func NewTodoStore(store store.TodoStore) *TodoStore {
 	p.Router.HandleFunc("/projects/{projectName}/task", p.GetAllProjectTasks).Methods("GET")
 	p.Router.HandleFunc("/projects/{projectName}/task/{taskName}", p.DeleteTask).Methods("DELETE")
 	p.Router.HandleFunc("/projects/{projectName}/task/{taskName}", p.UpdateTask).Methods("PUT")
-	p.Router.HandleFunc("/projects/{projectName}/task/{taskName}/complete", p.CompleteTask).Methods("PUT")
+	p.Router.HandleFunc("/projects/{projectName}/task/{taskName}/complete", p.CompleteTask).Methods("PUT", "DELETE")
+
 	return p
 }
 

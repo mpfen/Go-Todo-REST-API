@@ -189,8 +189,12 @@ func CompleteTaskHandler(p store.TodoStore, w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	// Complete and update task
-	task.CompleteTask()
+	// Complete or reopen and update task
+	if r.Method == "PUT" {
+		task.CompleteTask()
+	} else {
+		task.ReopenTask()
+	}
 
 	err := p.UpdateTask(task)
 	if err != nil {

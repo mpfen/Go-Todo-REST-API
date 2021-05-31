@@ -33,7 +33,7 @@ func setupTaskTests() (server *api.TodoStore, store *StubTodoStore) {
 		}, {Name: "physics",
 			Priority:  "1",
 			Deadline:  &time,
-			Done:      false,
+			Done:      true,
 			ProjectID: "homework",
 		}},
 	}
@@ -204,7 +204,31 @@ func TestUpdateTask(t *testing.T) {
 func TestCompleteTask(t *testing.T) {
 	server, store := setupTaskTests()
 
-	t.Run("Compelete task math from project homework", func(t *testing.T) {
+	t.Run("Compelete task physics from project homework", func(t *testing.T) {
+		request, _ := http.NewRequest(http.MethodDelete, "/projects/homework/task/physics/complete", nil)
+		response := httptest.NewRecorder()
+
+		server.Router.ServeHTTP(response, request)
+
+		assertResponseStatus(t, response.Code, http.StatusOK)
+		assertTaskDoneStatus(t, store, "homework", "math", false)
+	})
+
+	t.Run("Try to reopen nonexisting task biology", func(t *testing.T) {
+		request, _ := http.NewRequest(http.MethodDelete, "/projects/homework/task/biology/complete", nil)
+		response := httptest.NewRecorder()
+
+		server.Router.ServeHTTP(response, request)
+
+		assertResponseStatus(t, response.Code, http.StatusNotFound)
+	})
+}
+
+// Test for reopening a task DELETE /project/{projectName}/task/{taskName}/complete
+func TestReopeningTask(t *testing.T) {
+	server, store := setupTaskTests()
+
+	t.Run("Reopen task math from project homework", func(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodPut, "/projects/homework/task/math/complete", nil)
 		response := httptest.NewRecorder()
 
