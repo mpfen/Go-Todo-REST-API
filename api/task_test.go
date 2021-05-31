@@ -12,9 +12,9 @@ import (
 	api "github.com/mpfen/Go-Todo-REST-API/api"
 )
 
-func setupTaskTests() (server *api.TodoStore, store StubTodoStore) {
+func setupTaskTests() (server *api.TodoStore, store *StubTodoStore) {
 	time := time.Now()
-	store = StubTodoStore{
+	store = &StubTodoStore{
 		map[string]bool{
 			"homework": false,
 			"cleaning": true,
@@ -38,7 +38,7 @@ func setupTaskTests() (server *api.TodoStore, store StubTodoStore) {
 		}},
 	}
 	// Uses the TodoStore with our StubTodoStore
-	server = api.NewTodoStore(&store)
+	server = api.NewTodoStore(store)
 	return server, store
 }
 
@@ -102,7 +102,7 @@ func TestPostTask(t *testing.T) {
 	})
 
 	t.Run("Try to create an already existing task", func(t *testing.T) {
-		requestBody := makeNewPostTaskBody(t, "biology", "homework")
+		requestBody := makeNewPostTaskBody(t, "math", "homework")
 		request, _ := http.NewRequest(http.MethodPost, "/projects/homework/task", requestBody)
 		response := httptest.NewRecorder()
 
@@ -243,7 +243,7 @@ func makeNewPostTaskBody(t *testing.T, taskName, projectName string) *bytes.Buff
 }
 
 // assert functions specific for tasks
-func assertTaskCreated(t testing.TB, store StubTodoStore, name string) {
+func assertTaskCreated(t testing.TB, store *StubTodoStore, name string) {
 	t.Helper()
 	for _, task := range store.Tasks {
 		if task.Name == name {
@@ -261,7 +261,7 @@ func assertTaskList(t testing.TB, got, want []stubTask) {
 	}
 }
 
-func assertTaskDeleted(t *testing.T, store StubTodoStore, projectName, taskName string) {
+func assertTaskDeleted(t *testing.T, store *StubTodoStore, projectName, taskName string) {
 	t.Helper()
 
 	for _, task := range store.Tasks {

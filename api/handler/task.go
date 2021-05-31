@@ -59,7 +59,7 @@ func PostTaskHandler(p store.TodoStore, w http.ResponseWriter, r *http.Request) 
 	duplicateTask := p.GetTask(projectName, taskName)
 
 	if duplicateTask.Name != "" {
-		sendJSONResponse(w, "A Task with that name already exists for this project", http.StatusNotFound)
+		sendJSONResponse(w, "A Task with that name already exists for this project", http.StatusBadRequest)
 		return
 	}
 

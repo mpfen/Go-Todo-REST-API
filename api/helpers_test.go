@@ -78,16 +78,8 @@ func (s *StubTodoStore) GetTask(projectID, taskName string) model.Task {
 
 // Create task in store
 func (s *StubTodoStore) PostTask(task model.Task) error {
-	for _, t := range s.Tasks {
-		if t.Name == task.Name {
-			return errors.New("Task already exists")
-		}
-	}
-
-	// todo - append to []Tasks does not work
-	// newTask := stubTask{Name: task.Name}
-	// s.Tasks = append(s.Tasks, newTask)
-	s.Tasks[1].Name = "biology"
+	newTask := stubTask{Name: task.Name}
+	s.Tasks = append(s.Tasks, newTask)
 
 	return nil
 }
@@ -117,10 +109,9 @@ func (s *StubTodoStore) DeleteTask(task model.Task) error {
 
 // Updates a task in the store
 func (s *StubTodoStore) UpdateTask(task model.Task) error {
-	// todo fix
-	//stubTask := stubTask{Name: task.Name}
-	//s.Tasks = append(s.Tasks, stubTask)
-	s.Tasks[0].Name = task.Name
+	stubTask := stubTask{Name: task.Name}
+	s.Tasks = append(s.Tasks, stubTask)
+
 	return nil
 }
 
