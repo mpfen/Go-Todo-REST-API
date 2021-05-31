@@ -117,7 +117,6 @@ func TestPostTask(t *testing.T) {
 		response := httptest.NewRecorder()
 
 		server.Router.ServeHTTP(response, request)
-		t.Log(response.Body)
 		assertResponseStatus(t, response.Code, http.StatusNotFound)
 	})
 }
@@ -151,7 +150,7 @@ func TestGetAllTasksOfAProject(t *testing.T) {
 
 }
 
-// Test for deleting a task DELETE /projects{projectName}/task/{taskName}
+// Test for deleting a task DELETE /projects/{projectName}/task/{taskName}
 func TestDeleteTask(t *testing.T) {
 	server, store := setupTaskTests()
 
@@ -167,6 +166,32 @@ func TestDeleteTask(t *testing.T) {
 
 	t.Run("Try to delete nonexisting task", func(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodDelete, "/projects/homework/task/science", nil)
+		response := httptest.NewRecorder()
+
+		server.Router.ServeHTTP(response, request)
+
+		assertResponseStatus(t, response.Code, http.StatusNotFound)
+	})
+}
+
+// Test for updating a task PUT /projects/{projectName}/task/{taskName}
+func TestUpdateTask(t *testing.T) {
+	server, store := setupTaskTests()
+
+	t.Run("Update task math from project homework", func(t *testing.T) {
+		requestBody := makeNewPostTaskBody(t, "mathhomework", "homework")
+		request, _ := http.NewRequest(http.MethodPut, "/projects/homework/task/math", requestBody)
+		response := httptest.NewRecorder()
+
+		server.Router.ServeHTTP(response, request)
+
+		assertResponseStatus(t, response.Code, http.StatusOK)
+		assertTaskCreated(t, store, "mathhomework")
+	})
+
+	t.Run("Try to update a nonexistent task", func(t *testing.T) {
+		requestBody := makeNewPostTaskBody(t, "mathhomework", "homework")
+		request, _ := http.NewRequest(http.MethodPut, "/projects/homework/task/kitchen", requestBody)
 		response := httptest.NewRecorder()
 
 		server.Router.ServeHTTP(response, request)

@@ -122,3 +122,48 @@ func DeleteTaskHandler(p store.TodoStore, w http.ResponseWriter, r *http.Request
 		sendJSONResponse(w, "Task was successfully deleted", http.StatusOK)
 	}
 }
+
+// Handler for route PUT /projects/{projectName}/task/{taskName}
+func UpdateTaskHandler(p store.TodoStore, w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	projectName := vars["projectName"]
+	taskName := vars["taskName"]
+
+	// Check if projects exists
+	project := p.GetProject(projectName)
+
+	if project.Name == "" {
+		sendJSONResponse(w, "No project with that name exists", http.StatusNotFound)
+		return
+	}
+
+	// Check if tasks exists
+	task := p.GetTask(projectName, taskName)
+
+	if task.Name == "" {
+		sendJSONResponse(w, "No task with that name exists", http.StatusNotFound)
+		return
+	}
+
+	// Decode task from request
+	updatedTask := model.Task{}
+
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&updatedTask); err != nil {
+		sendJSONResponse(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
+
+	// Update task
+	task.Name = updatedTask.Name
+	err := p.UpdateTask(task)
+
+	if err != nil {
+		sendJSONResponse(w, "Problem updating task", http.StatusInternalServerError)
+		return
+	} else {
+		sendJSONResponse(w, "Task successfully updated", http.StatusOK)
+		return
+	}
+}

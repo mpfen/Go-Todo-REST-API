@@ -23,6 +23,7 @@ type TodoStore interface {
 	PostTask(task model.Task) error
 	GetAllProjectTasks(project model.Project) []model.Task
 	DeleteTask(task model.Task) error
+	UpdateTask(task model.Task) error
 }
 
 type Database struct {
@@ -125,6 +126,12 @@ func (d *Database) GetAllProjectTasks(project model.Project) []model.Task {
 // Deletes a Task
 func (d *Database) DeleteTask(task model.Task) error {
 	err := d.DB.Unscoped().Where("Name = ? AND Project_ID = ?", task.Name, task.ProjectID).Delete(&task).Error
+	return err
+}
+
+// Updates a task
+func (d *Database) UpdateTask(task model.Task) error {
+	err := d.DB.Save(&task).Error
 	return err
 }
 

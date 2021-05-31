@@ -115,6 +115,15 @@ func (s *StubTodoStore) DeleteTask(task model.Task) error {
 	return nil
 }
 
+// Updates a task in the store
+func (s *StubTodoStore) UpdateTask(task model.Task) error {
+	// todo fix
+	//stubTask := stubTask{Name: task.Name}
+	//s.Tasks = append(s.Tasks, stubTask)
+	s.Tasks[0].Name = task.Name
+	return nil
+}
+
 // to comply with interface
 func wrapStubTask(taskName string) model.Task {
 	modelTask := model.Task{}

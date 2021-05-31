@@ -11,6 +11,7 @@ package api_test
 // GetTask(projectID string, taskName string) model.Task
 // PostTask(task model.Task) error
 // DeleteTask(task model.Task) error
+// UpdateTask(task model.Task) error
 
 import (
 	"io/ioutil"
@@ -68,8 +69,8 @@ func populateTestDatabaseTasks(t *testing.T, db *store.Database) {
 		return
 	}
 
-	taskPhysic := model.Task{Name: "physic", ProjectID: uint(2)}
-	err = db.PostTask(taskPhysic)
+	taskPhysics := model.Task{Name: "physics", ProjectID: uint(2)}
+	err = db.PostTask(taskPhysics)
 
 	if err != nil {
 		t.Fatalf("Error populating test database with tasks: %v", err)
@@ -99,6 +100,8 @@ func TestDatabase(t *testing.T) {
 
 	})
 
+	// projects/homework
+	// projects/cleaning
 	populateTestDatabaseProjects(t, db)
 
 	t.Run("Try to create an already existing project", func(t *testing.T) {
@@ -175,6 +178,8 @@ func TestDatabase(t *testing.T) {
 		}
 	})
 
+	// homework/task/biology
+	// homework/task/physics
 	populateTestDatabaseTasks(t, db)
 
 	// GetAllProjectTasks(projectName string) []model.Task
@@ -202,5 +207,21 @@ func TestDatabase(t *testing.T) {
 		err := db.DeleteTask(task)
 
 		assertError(t, "Task should have been deleted", err)
+	})
+
+	// UpdateTask(task model.Task) error
+	t.Run("Update a task", func(t *testing.T) {
+		// Get task to update and change the name
+		task := db.GetTask("homework", "physics")
+		task.Name = "newtonsLaw"
+
+		err := db.UpdateTask(task)
+		assertError(t, "tried to update task", err)
+
+		// check if task was updated
+		wasUpdated := db.GetTask("homework", "newtonsLaw")
+		if wasUpdated.Name == "" {
+			t.Error("Task was not updated")
+		}
 	})
 }
