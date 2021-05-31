@@ -100,7 +100,7 @@ func (s *StubTodoStore) GetAllProjectTasks(project model.Project) []model.Task {
 func (s *StubTodoStore) DeleteTask(task model.Task) error {
 	for i, storeTask := range s.Tasks {
 		if storeTask.Name == task.Name {
-			s.Tasks[i].Name = ""
+			s.Tasks = append(s.Tasks[:i], s.Tasks[(i+1):]...)
 			return nil
 		}
 	}
@@ -109,7 +109,15 @@ func (s *StubTodoStore) DeleteTask(task model.Task) error {
 
 // Updates a task in the store
 func (s *StubTodoStore) UpdateTask(task model.Task) error {
-	stubTask := stubTask{Name: task.Name}
+	// since we dont know the old task name we search for any duplicates and delete them
+	// for the case that the task was not renamed but completed/reopened
+	for i, storeTask := range s.Tasks {
+		if storeTask.Name == task.Name {
+			s.Tasks = append(s.Tasks[:i], s.Tasks[(i+1):]...)
+		}
+	}
+
+	stubTask := stubTask{Name: task.Name, Done: task.Done}
 	s.Tasks = append(s.Tasks, stubTask)
 
 	return nil
