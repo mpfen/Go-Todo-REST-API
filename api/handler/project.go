@@ -26,7 +26,6 @@ func GetProjectHandler(p store.TodoStore, w http.ResponseWriter, r *http.Request
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(project)
 	}
-
 }
 
 // Handler for POST /projects/
@@ -117,7 +116,8 @@ func UpdateProjectHandler(p store.TodoStore, w http.ResponseWriter, r *http.Requ
 	sendJSONResponse(w, "Project successfully updated", http.StatusOK)
 }
 
-// Handler for PUT /projects/{name}/archive
+// Handler for PUT DELETE /projects/{name}/archive
+// PUT archived project - DELETE unarchives Project
 func ArchiveProjectHandler(p store.TodoStore, w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	projectName := vars["name"]
@@ -130,8 +130,12 @@ func ArchiveProjectHandler(p store.TodoStore, w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	// archive project
-	project.ArchiveProject()
+	// archive or unarchive project
+	if r.Method == "PUT" {
+		project.ArchiveProject()
+	} else {
+		project.UnArchiveProject()
+	}
 
 	err := p.UpdateProject(project)
 
@@ -141,32 +145,6 @@ func ArchiveProjectHandler(p store.TodoStore, w http.ResponseWriter, r *http.Req
 	}
 
 	sendJSONResponse(w, "Project successfully archived", http.StatusOK)
-}
-
-// Handler for DELETE /projects/{name}/archive
-func UnArchiveProjectHandler(p store.TodoStore, w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	projectName := vars["name"]
-
-	// check if project exists
-	project := p.GetProject(projectName)
-
-	if project.Name == "" {
-		sendJSONResponse(w, "No project with this name found", http.StatusNotFound)
-		return
-	}
-
-	// archive project
-	project.UnArchiveProject()
-
-	err := p.UpdateProject(project)
-
-	if err != nil {
-		sendJSONResponse(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	sendJSONResponse(w, "Project successfully unarchived", http.StatusOK)
 }
 
 func sendJSONResponse(w http.ResponseWriter, message string, code int) {

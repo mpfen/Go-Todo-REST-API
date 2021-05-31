@@ -168,6 +168,8 @@ func UpdateTaskHandler(p store.TodoStore, w http.ResponseWriter, r *http.Request
 	}
 }
 
+// ComepleteTaskHandler PUT DELETE /projects/{projectName}/task/{taskName}/complete
+// PUT completes task - DELETE reopens task
 func CompleteTaskHandler(p store.TodoStore, w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	projectName := vars["projectName"]
