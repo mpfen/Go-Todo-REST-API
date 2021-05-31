@@ -167,3 +167,36 @@ func UpdateTaskHandler(p store.TodoStore, w http.ResponseWriter, r *http.Request
 		return
 	}
 }
+
+func CompleteTaskHandler(p store.TodoStore, w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	projectName := vars["projectName"]
+	taskName := vars["taskName"]
+
+	// Check if projects exists
+	project := p.GetProject(projectName)
+
+	if project.Name == "" {
+		sendJSONResponse(w, "No project with that name exists", http.StatusNotFound)
+		return
+	}
+
+	// Check if tasks exists
+	task := p.GetTask(projectName, taskName)
+
+	if task.Name == "" {
+		sendJSONResponse(w, "No task with that name exists", http.StatusNotFound)
+		return
+	}
+
+	// Complete and update task
+	task.CompleteTask()
+
+	err := p.UpdateTask(task)
+	if err != nil {
+		sendJSONResponse(w, "Problem upating task", http.StatusInternalServerError)
+		return
+	} else {
+		sendJSONResponse(w, "Task was completed", http.StatusOK)
+	}
+}

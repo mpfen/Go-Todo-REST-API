@@ -34,3 +34,11 @@ type Task struct {
 	Done      bool       `json:"done"`
 	ProjectID uint       `json:"project_id"`
 }
+
+func (t *Task) CompleteTask() {
+	t.Done = true
+}
+
+func (t *Task) ReopenTask() {
+	t.Done = false
+}

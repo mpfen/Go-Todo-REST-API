@@ -200,6 +200,30 @@ func TestUpdateTask(t *testing.T) {
 	})
 }
 
+// Test for completing a task PUT /project/{projectName}/task/{taskName}/complete
+func TestCompleteTask(t *testing.T) {
+	server, store := setupTaskTests()
+
+	t.Run("Compelete task math from project homework", func(t *testing.T) {
+		request, _ := http.NewRequest(http.MethodPut, "/projects/homework/task/math/complete", nil)
+		response := httptest.NewRecorder()
+
+		server.Router.ServeHTTP(response, request)
+
+		assertResponseStatus(t, response.Code, http.StatusOK)
+		assertTaskDoneStatus(t, store, "homework", "math", true)
+	})
+
+	t.Run("Try to compelete nonexisting task biology", func(t *testing.T) {
+		request, _ := http.NewRequest(http.MethodPut, "/projects/homework/task/biology/complete", nil)
+		response := httptest.NewRecorder()
+
+		server.Router.ServeHTTP(response, request)
+
+		assertResponseStatus(t, response.Code, http.StatusNotFound)
+	})
+}
+
 // Decodes the response body to a task struct
 func decodeTaskFromResponse(t testing.TB, rdr io.Reader) stubTask {
 	t.Helper()
@@ -267,6 +291,18 @@ func assertTaskDeleted(t *testing.T, store *StubTodoStore, projectName, taskName
 	for _, task := range store.Tasks {
 		if task.Name == taskName && task.ProjectID == projectName {
 			t.Errorf("Task %v was not deleted", taskName)
+		}
+	}
+}
+
+func assertTaskDoneStatus(t *testing.T, store *StubTodoStore, projectName, taskName string, done bool) {
+	t.Helper()
+
+	for _, task := range store.Tasks {
+		if task.Name == taskName && task.ProjectID == projectName {
+			if task.Done != done {
+				t.Errorf("Task done status is wrong: got %v want %v", task.Done, done)
+			}
 		}
 	}
 }
