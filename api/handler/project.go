@@ -5,11 +5,8 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/mpfen/Go-Todo-REST-API/api/model"
 	"github.com/mpfen/Go-Todo-REST-API/api/store"
 )
-
-const jsonContentType = "application/json"
 
 // Handler for GET /project/{name}
 func GetProjectHandler(p store.TodoStore, w http.ResponseWriter, r *http.Request) {
@@ -30,15 +27,10 @@ func GetProjectHandler(p store.TodoStore, w http.ResponseWriter, r *http.Request
 
 // Handler for POST /projects/
 func PostProjectHandler(p store.TodoStore, w http.ResponseWriter, r *http.Request) {
-	project := model.Project{}
+	// Decode project from request
+	project := decodeProjectFromRequestOr400(w, r)
 
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&project); err != nil {
-		sendJSONResponse(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	defer r.Body.Close()
-
+	// Create new project
 	err := p.PostProject(project.Name)
 
 	if err != nil {
@@ -46,7 +38,7 @@ func PostProjectHandler(p store.TodoStore, w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
+	sendJSONResponse(w, "Project successfully created", http.StatusCreated)
 }
 
 // Handler for GET /projects/
@@ -63,12 +55,7 @@ func DeleteProjectHandler(p store.TodoStore, w http.ResponseWriter, r *http.Requ
 	projectName := vars["name"]
 
 	// Check if project exists
-	project := p.GetProject(projectName)
-
-	if project.Name == "" {
-		sendJSONResponse(w, "No project with this name found", http.StatusNotFound)
-		return
-	}
+	checkIfProjectExistsOr404(p, w, projectName)
 
 	// Delete project if project exists
 	err := p.DeleteProject(projectName)
@@ -88,24 +75,14 @@ func UpdateProjectHandler(p store.TodoStore, w http.ResponseWriter, r *http.Requ
 	projectName := vars["name"]
 
 	// Check if project exists
-	project := p.GetProject(projectName)
+	project := checkIfProjectExistsOr404(p, w, projectName)
 
-	if project.Name == "" {
-		sendJSONResponse(w, "No project with this name found", http.StatusNotFound)
-		return
-	}
-
-	// Get new Project Name
-	newProject := model.Project{}
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&newProject); err != nil {
-		sendJSONResponse(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	defer r.Body.Close()
+	// Get new project name from request
+	newProject := decodeProjectFromRequestOr400(w, r)
 
 	project.Name = newProject.Name
 
+	// Update project
 	err := p.UpdateProject(project)
 
 	if err != nil {
@@ -122,21 +99,20 @@ func ArchiveProjectHandler(p store.TodoStore, w http.ResponseWriter, r *http.Req
 	vars := mux.Vars(r)
 	projectName := vars["name"]
 
-	// check if project exists
-	project := p.GetProject(projectName)
+	// Check if project exists
+	project := checkIfProjectExistsOr404(p, w, projectName)
 
-	if project.Name == "" {
-		sendJSONResponse(w, "No project with this name found", http.StatusNotFound)
-		return
-	}
-
-	// archive or unarchive project
+	// Archive or unarchive project
+	var responseText string
 	if r.Method == "PUT" {
 		project.ArchiveProject()
+		responseText = "Project successfully archived"
 	} else {
 		project.UnArchiveProject()
+		responseText = "Project successfully unarchived"
 	}
 
+	// Update project
 	err := p.UpdateProject(project)
 
 	if err != nil {
@@ -144,12 +120,5 @@ func ArchiveProjectHandler(p store.TodoStore, w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	sendJSONResponse(w, "Project successfully archived", http.StatusOK)
-}
-
-func sendJSONResponse(w http.ResponseWriter, message string, code int) {
-	w.Header().Set("content-type", jsonContentType)
-	w.WriteHeader(code)
-	json.NewEncoder(w).Encode(map[string]string{"message": message})
-
+	sendJSONResponse(w, responseText, http.StatusOK)
 }
