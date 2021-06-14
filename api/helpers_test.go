@@ -110,7 +110,7 @@ func (s *StubTodoStore) DeleteTask(task model.Task) error {
 // Updates a task in the store
 func (s *StubTodoStore) UpdateTask(task model.Task) error {
 	// since we dont know the old task name we search for any duplicates and delete them
-	// for the case that the task was not renamed but completed/reopened
+	// in the case that the task was not renamed but completed/reopened
 	for i, storeTask := range s.Tasks {
 		if storeTask.Name == task.Name {
 			s.Tasks = append(s.Tasks[:i], s.Tasks[(i+1):]...)

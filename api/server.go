@@ -29,12 +29,12 @@ func NewTodoStore(store store.TodoStore) *TodoStore {
 	p.Router.HandleFunc("/projects/{name}/archive", p.ArchiveProject).Methods("PUT", "DELETE")
 
 	// Task routes
-	p.Router.HandleFunc("/projects/{projectName}/task/{taskName}", p.GetTask).Methods("GET")
-	p.Router.HandleFunc("/projects/{projectName}/task", p.PostTask).Methods("POST")
-	p.Router.HandleFunc("/projects/{projectName}/task", p.GetAllProjectTasks).Methods("GET")
-	p.Router.HandleFunc("/projects/{projectName}/task/{taskName}", p.DeleteTask).Methods("DELETE")
-	p.Router.HandleFunc("/projects/{projectName}/task/{taskName}", p.UpdateTask).Methods("PUT")
-	p.Router.HandleFunc("/projects/{projectName}/task/{taskName}/complete", p.CompleteTask).Methods("PUT", "DELETE")
+	p.Router.HandleFunc("/projects/{projectName}/tasks/{taskName}", p.GetTask).Methods("GET")
+	p.Router.HandleFunc("/projects/{projectName}/tasks", p.PostTask).Methods("POST")
+	p.Router.HandleFunc("/projects/{projectName}/tasks", p.GetAllProjectTasks).Methods("GET")
+	p.Router.HandleFunc("/projects/{projectName}/tasks/{taskName}", p.DeleteTask).Methods("DELETE")
+	p.Router.HandleFunc("/projects/{projectName}/tasks/{taskName}", p.UpdateTask).Methods("PUT")
+	p.Router.HandleFunc("/projects/{projectName}/tasks/{taskName}/complete", p.CompleteTask).Methods("PUT", "DELETE")
 
 	return p
 }
